@@ -33,9 +33,22 @@ jobs:
 
       - name: Gerar páginas publicadas a partir das fontes (.dc.html)
         run: |
+          set -euo pipefail
+          # Falha o build (sem publicar) se qualquer fonte ou dependência faltar
+          req=(
+            "Relatorio Emagrecimento.dc.html"
+            "Relatorio Emagrecimento-print.dc.html"
+            "Atualizador da Base.dc.html"
+            "support.js" "calc.js" "report-charts.js" "deck-stage.js"
+            "base-emagrecimento.js" ".nojekyll"
+          )
+          for f in "${req[@]}"; do
+            [ -f "$f" ] || { echo "::error::Arquivo obrigatório ausente: $f"; exit 1; }
+          done
           cp "Relatorio Emagrecimento.dc.html" index.html
           cp "Relatorio Emagrecimento-print.dc.html" relatorio-print.html
           cp "Atualizador da Base.dc.html" atualizador.html
+          echo "Build OK: index.html, relatorio-print.html, atualizador.html"
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5
@@ -48,3 +61,4 @@ jobs:
       - name: Publicar no Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
