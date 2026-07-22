@@ -10,201 +10,969 @@
 <helmet>
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/colors.css">
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/radii.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/shadows.css">
   <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap">
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;display=swap">
+  <script src="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="calc.js"></script>
+  <script src="report-charts.js"></script>
+  <style>
+    @keyframes hy-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .hy-tgl { transition: background .15s ease, color .15s ease, border-color .15s ease; }
+    .hy-dd { position:relative; display:inline-block; font-family:'Asap',sans-serif; }
+    .hy-dd-btn { display:inline-flex; align-items:center; gap:10px; font-family:inherit; font-size:20px; font-weight:600; color:var(--hy-blue); background:var(--hy-blue-bg); border:1.5px solid var(--hy-blue); border-radius:800px; padding:8px 18px; cursor:pointer; white-space:nowrap; transition:background .15s ease, color .15s ease; }
+    .hy-dd-btn:hover { background:#DCEBF8; }
+    .hy-dd[data-open="1"] .hy-dd-btn { background:var(--hy-blue); color:#fff; }
+    .hy-dd-caret { width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid currentColor; transition:transform .15s ease; }
+    .hy-dd[data-open="1"] .hy-dd-caret { transform:rotate(180deg); }
+    .hy-dd-list { position:absolute; top:calc(100% + 6px); right:0; min-width:100%; background:#fff; border:1px solid var(--hy-border); border-radius:10px; box-shadow:0 10px 28px rgba(7,72,120,.18); padding:6px; z-index:1000; display:none; max-height:360px; overflow:auto; }
+    .hy-dd[data-open="1"] .hy-dd-list { display:block; }
+    .hy-dd-opt { font-size:18px; font-weight:600; color:var(--hy-ink); padding:9px 16px; border-radius:7px; cursor:pointer; white-space:nowrap; transition:background .1s ease; }
+    .hy-dd-opt:hover { background:var(--hy-blue-bg); }
+    .hy-dd-opt[aria-selected="1"] { color:var(--hy-blue); background:#EDF6FC; }
+    .hy-pdf-btn { transition: background .15s ease, box-shadow .15s ease, transform .05s ease; }
+    .hy-pdf-btn:hover { background: #074878 !important; box-shadow: 0 4px 14px rgba(7,72,120,.30) !important; }
+    .hy-pdf-btn:active { transform: translateY(1px); }
+    @media print { .hy-pdf-btn { display: none !important; } }
+  </style>
 </helmet>
-<div style="font-family:'Asap',sans-serif; background:var(--hy-blue-bg); min-height:100vh; color:var(--hy-body);">
-<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0062AA"/><g transform="translate(34,28)" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M16 0v30"/><path d="M4 18l12 12 12-12"/><rect x="0" y="38" width="32" height="6" rx="3" fill="#00BFDF" stroke="none"/></g></svg></template>
-  <div style="max-width:940px; margin:0 auto; padding:40px 32px 80px;">
-    <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid var(--hy-blue); padding-bottom:16px; margin-bottom:8px;">
+<div style="font-family: 'Asap', sans-serif;">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#074878"/><g transform="translate(30,32)"><rect x="0" y="20" width="8" height="16" rx="1.5" fill="#00BFDF"/><rect x="12" y="10" width="8" height="26" rx="1.5" fill="#A9D0EE"/><rect x="24" y="2" width="8" height="34" rx="1.5" fill="#fff"/></g></svg></template>
+<button class="hy-pdf-btn" onClick="{{ baixarPdf }}" data-uneditable="" style="position:fixed; top:18px; right:18px; z-index:2147483647; display:inline-flex; align-items:center; gap:8px; background:#0062AA; color:#fff; border:none; border-radius:8px; padding:10px 18px; font-family:'Asap',sans-serif; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(7,72,120,.20);">
+  <span class="material-symbols-outlined" style="font-size:20px;">picture_as_pdf</span>
+  Baixar PDF
+</button>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+  <!-- 1 · CAPA -->
+  <section data-label="Capa" data-speaker-notes="Relatório mensal do mercado de emagrecimento GLP-1. Toda a apresentação é gerada a partir de uma base de dados única e atualizável." style="position:relative; overflow:hidden; background:#074878;">
+    <img src="assets/cover-blue-textured.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.55;">
+    <div style="position:absolute; inset:0; background:linear-gradient(105deg, rgba(7,72,120,.94) 0%, rgba(0,98,170,.78) 55%, rgba(0,191,223,.35) 100%);"></div>
+    
+  <div style="position:relative; height:100%; box-sizing:border-box; padding:110px 120px; display:flex; flex-direction:column; justify-content:space-between; color:#fff;">
+      
       <div>
-        <div style="font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--hy-cyan); font-weight:700;">Inteligência de Mercado · Farma</div>
-        <h1 style="font-size:30px; font-weight:700; color:var(--hy-ink); margin:4px 0 0;">Atualizador da Base</h1>
+        <div style="display:inline-block; font-size:22px; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; font-weight:600; margin-bottom:26px;">Inteligência de Mercado · Farma</div>
+        <h1 style="font-size:88px; line-height:1.04; font-weight:700; margin:0; max-width:1250px;">Mercado de Emagrecimento<br>GLP-1</h1>
+        <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:38px 0 30px;"></div>
+        <p style="font-size:34px; font-weight:500; margin:0; color:#EDF6FC;">Acompanhamento mensal · FMB IQVIA (30 dias)</p>
       </div>
-      <img src="assets/logo-hypera.svg" alt="Hypera Pharma" style="height:34px;">
-    </div>
-    <p style="font-size:16px; line-height:1.55; margin:16px 0 28px; max-width:820px;">Fluxo em um passo: baixe o modelo, preencha as abas <b>Dados</b> e <b>Preco</b> no Excel, solte o arquivo aqui e clique em <b>Gerar base</b>. O download <code style="background:#fff; padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:13px;">base-emagrecimento.js</code> substitui o atual no GitHub — a apresentação se recalcula sozinha.</p>
-
-    <div id="dropZone" style="background:#fff; border:2px dashed var(--hy-blue); border-radius:12px; padding:36px 28px; margin-bottom:24px; text-align:center;">
-      <div style="font-size:19px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Solte o Excel da base aqui</div>
-      <div style="font-size:14px; color:var(--hy-muted); margin-bottom:18px;">Uma planilha com as abas <b>Dados</b> (marca · molecula · corporacao · periodo · canal · dosagem · target · PPP · CPP · unidades) e <b>Preco</b> (marca · referencia · dosagem · periodo · rede · valor). A coluna <b>CPP</b> (R$ MM) é opcional — se estiver presente, a métrica aparece automaticamente no relatório.</div>
-      <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
-        <label style="font-family:inherit; font-size:15px; font-weight:600; color:#fff; background:var(--hy-blue); border-radius:8px; padding:11px 24px; cursor:pointer;">Selecionar arquivo<input id="inpFile" type="file" accept=".xlsx,.xls,.csv,text/csv" style="display:none;"></label>
-        <a href="Modelo Base -Excel-.xlsx" download="Modelo Base.xlsx" style="font-family:inherit; font-size:15px; font-weight:600; color:var(--hy-blue); background:#fff; border:1.5px solid var(--hy-blue); border-radius:8px; padding:11px 24px; cursor:pointer; text-decoration:none;">Baixar modelo (Excel)</a>
+      <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+        <div style="display:flex; gap:14px; align-items:center;">
+          <span id="capaRef" style="font-size:26px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 24px; border-radius:800px;">Referência: jun/26 · parcial</span>
+          <span id="capaAt" style="font-size:22px; color:#A9D0EE;">Atualizado em 14/jul/26</span>
+        </div>
+        
       </div>
-      <div id="impInfo" style="font-size:14px; margin-top:16px;"></div>
-    </div>
+    </div></section>
 
-    <div style="background:#fff; border:1px solid var(--hy-border); border-radius:12px; padding:24px 28px; margin-bottom:24px;">
-      <div style="font-size:18px; font-weight:700; color:var(--hy-ink); margin-bottom:16px;">Cabeçalho do relatório</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
-        <label style="font-size:14px; font-weight:600; color:var(--hy-muted);">Mês de referência<input id="inpRef" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid var(--hy-border); border-radius:8px;"></label>
-        <label style="font-size:14px; font-weight:600; color:var(--hy-muted);">Atualizado em<input id="inpAt" style="display:block; width:100%; box-sizing:border-box; margin-top:6px; font-family:inherit; font-size:16px; padding:10px 12px; border:1.5px solid var(--hy-border); border-radius:8px;"></label>
+  <!-- 2 · DIVISÓRIA -->
+  <section data-label="Seção · One Page" data-speaker-notes="Visão consolidada do mercado em uma página. Alterne entre PPP (R$) e Unidades com o mesmo dado de base." style="position:relative; background:linear-gradient(120deg,#074878 0%,#0062AA 100%); overflow:hidden;">
+    <div style="position:absolute; right:-160px; bottom:-160px; width:640px; height:640px; border-radius:50%; background:rgba(0,191,223,.16);"></div>
+    <div style="position:relative; height:100%; box-sizing:border-box; padding:120px; display:flex; flex-direction:column; justify-content:center; color:#fff;">
+      <div style="font-size:200px; font-weight:700; color:rgba(255,255,255,.14); line-height:1;">01</div>
+      <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:8px 0 34px;"></div>
+      <h2 style="font-size:76px; font-weight:700; margin:0;">One Page — Visão de Mercado</h2>
+      <p style="font-size:32px; color:#A9D0EE; margin:24px 0 0; max-width:1100px;">Market share, sell-out e crescimento por marca, molécula e corporação — em PPP (R$) e Unidades.</p>
+    </div>
+  </section>
+
+  <!-- 3 · ONE PAGE DASHBOARD -->
+  <section data-label="One Page" data-speaker-notes="Painel principal. KPIs no topo; gráfico grande = mercado total vs segmento target + crescimento; à direita, market share por marca, molécula e corporação. Botões PPP/Unidades trocam a visão instantaneamente." style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
+          <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">One Page — Mercado de Emagrecimento</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button>
+          <button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button>
+        </div>
       </div>
-      <div id="perInfo" style="font-size:13px; color:var(--hy-muted); margin-top:14px;"></div>
-    </div>
 
-    <div id="valPanel" style="background:#fff; border:1px solid var(--hy-border); border-radius:12px; padding:20px 24px; margin-bottom:24px; display:none;"></div>
+      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin-bottom:20px;">
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div id="kpiTotalLbl" style="font-size:19px; color:var(--hy-muted); font-weight:600;">Mercado total</div>
+          <div id="kpiTotal" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div id="kpiTotalD" style="font-size:20px; font-weight:600;">—</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Crescimento mercado</div>
+          <div id="kpiCresc" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div id="kpiCrescLbl" style="font-size:18px; color:var(--hy-muted);">vs. mês anterior</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Líder · Tirzepatida</div>
+          <div id="kpiLider" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div style="font-size:18px; color:var(--hy-muted);">market share</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Segmento target</div>
+          <div id="kpiTarget" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div style="font-size:18px; color:var(--hy-muted);">Semaglutida ≤ 1mg</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Cresc. segmento target</div>
+          <div id="kpiTgtCresc" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div style="font-size:18px; color:var(--hy-muted);">vs. ano ant. (MAA)</div>
+        </div>
+      </div>
 
-    <div style="display:flex; gap:12px; align-items:center; position:sticky; bottom:0; background:var(--hy-blue-bg); padding:16px 0;">
-      <button id="btnGen" style="font-family:inherit; font-size:16px; font-weight:600; color:#fff; background:var(--hy-blue); border:none; border-radius:8px; padding:12px 28px; cursor:pointer;">Validar e gerar base</button>
-      <button id="btnDl" disabled style="font-family:inherit; font-size:16px; font-weight:600; color:var(--hy-blue); background:#fff; border:1.5px solid var(--hy-blue); border-radius:8px; padding:12px 28px; cursor:pointer; opacity:.5;">Baixar base-emagrecimento.js</button>
-      <button id="btnPub" disabled style="font-family:inherit; font-size:16px; font-weight:600; color:#fff; background:#0a7d34; border:none; border-radius:8px; padding:12px 28px; cursor:pointer; opacity:.5;">Publicar no GitHub</button>
-      <span id="status" style="font-size:14px; color:var(--hy-muted);"></span>
+      <div style="flex:1; display:grid; grid-template-columns:1.35fr 1fr; gap:22px; min-height:0;">
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;">
+          <div id="heroTitle" style="font-size:24px; font-weight:700; color:var(--hy-ink); margin-bottom:12px;">Mercado total vs. segmento target</div>
+          <div style="flex:1; position:relative; min-height:0;"><canvas id="chHero"></canvas></div>
+        </div>
+        <div style="display:grid; grid-template-rows:repeat(3,1fr); gap:16px; min-height:0;">
+          <div style="border:1px solid var(--hy-border); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; min-height:0;">
+            <div id="tOpMarca" style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Market share por marca (%)</div>
+            <div style="flex:1; position:relative; min-height:0;"><canvas id="chMarca"></canvas></div>
+          </div>
+          <div style="border:1px solid var(--hy-border); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; min-height:0;">
+            <div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Market share por molécula (%)</div>
+            <div style="flex:1; position:relative; min-height:0;"><canvas id="chMol"></canvas></div>
+          </div>
+          <div style="border:1px solid var(--hy-border); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; min-height:0;">
+            <div id="tOpCorp" style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Market share por corporação (%)</div>
+            <div style="flex:1; position:relative; min-height:0;"><canvas id="chCorp"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:16px; color:var(--hy-muted); margin-top:14px;">Nota: Mercado total (considera patentes) · Fonte: FMB IQVIA Jun/26 (30 dias) · Driver PP · Corporação e segmento derivados automaticamente da base.</div>
     </div>
-  </div>
+  </section>
+
+  <!-- ONE PAGE · CORPORAÇÃO -->
+  <section data-label="One Page · Corporação" data-speaker-notes="Visão consolidada de uma corporação: sell-out, share no mercado, marca líder e mix de marca e molécula. Selecione a corporação no topo." style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
+          <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">One Page — Corporação</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="display:flex; gap:10px; align-items:center;" id="corpChips"></div>
+          <button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button>
+          <button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:20px;">
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div id="coKpiSellLbl" style="font-size:19px; color:var(--hy-muted); font-weight:600;">Sell-out</div>
+          <div id="coKpiSell" style="font-size:42px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Share no mercado</div>
+          <div id="coKpiShare" style="font-size:42px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Crescimento</div>
+          <div id="coKpiCresc" style="font-size:42px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div id="coKpiCrescLbl" style="font-size:17px; color:var(--hy-muted);">vs. ano ant. (MAA)</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Marca líder</div>
+          <div id="coKpiLider" style="font-size:34px; font-weight:700; color:var(--hy-blue); line-height:1.15;">—</div>
+        </div>
+      </div>
+
+      <div style="flex:1; display:grid; grid-template-columns:1.35fr 1fr; gap:22px; min-height:0;">
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;">
+          <div id="coHeroTitle" style="font-size:24px; font-weight:700; color:var(--hy-ink); margin-bottom:12px;">Sell-out por marca e share no mercado</div>
+          <div style="flex:1; position:relative; min-height:0;"><canvas id="chCorpHero"></canvas></div>
+        </div>
+        <div style="display:grid; grid-template-rows:1fr 1fr; gap:16px; min-height:0;">
+          <div style="border:1px solid var(--hy-border); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; min-height:0;">
+            <div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Mix por marca (%)</div>
+            <div style="flex:1; position:relative; min-height:0;"><canvas id="chCorpMarca"></canvas></div>
+          </div>
+          <div style="border:1px solid var(--hy-border); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; min-height:0;">
+            <div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Mix por molécula (%)</div>
+            <div style="flex:1; position:relative; min-height:0;"><canvas id="chCorpMol"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONE PAGE · CANAL -->
+  <section data-label="One Page · Canal" data-speaker-notes="Visão consolidada de um canal (Direto vs. Indireto): sell-out, share no mercado, marca e molécula líderes e mix. Selecione o canal no topo." style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
+          <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">One Page — Canal</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="display:flex; gap:10px; align-items:center;" id="canChips"></div>
+          <button class="hy-tgl cmol-tgl" data-mo="Total" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Total</button>
+          <button class="hy-tgl cmol-tgl" data-mo="Semaglutida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Semaglutida</button>
+          <button class="hy-tgl cmol-tgl" data-mo="Tirzepatida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Tirzepatida</button>
+          <button class="hy-tgl cmol-tgl" data-mo="Liraglutida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Liraglutida</button>
+          <button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button>
+          <button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:20px;">
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div id="caKpiSellLbl" style="font-size:19px; color:var(--hy-muted); font-weight:600;">Sell-out</div>
+          <div id="caKpiSell" style="font-size:42px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Share no mercado</div>
+          <div id="caKpiShare" style="font-size:42px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Crescimento</div>
+          <div id="caKpiCresc" style="font-size:42px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div id="caKpiCrescLbl" style="font-size:17px; color:var(--hy-muted);">vs. ano ant. (MAA)</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Marca líder</div>
+          <div id="caKpiLider" style="font-size:34px; font-weight:700; color:var(--hy-blue); line-height:1.15;">—</div>
+        </div>
+      </div>
+      <div style="flex:1; display:grid; grid-template-columns:1.35fr 1fr; gap:22px; min-height:0;">
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;">
+          <div id="caHeroTitle" style="font-size:24px; font-weight:700; color:var(--hy-ink); margin-bottom:12px;">Sell-out por marca e share no mercado</div>
+          <div style="flex:1; position:relative; min-height:0;"><canvas id="chCanHero"></canvas></div>
+        </div>
+        <div style="display:grid; grid-template-rows:1fr 1fr; gap:16px; min-height:0;">
+          <div style="border:1px solid var(--hy-border); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; min-height:0;">
+            <div id="tCanMarca" style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Mix por marca (%)</div>
+            <div style="flex:1; position:relative; min-height:0;"><canvas id="chCanMarca"></canvas></div>
+          </div>
+          <div style="border:1px solid var(--hy-border); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; min-height:0;">
+            <div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Mix por molécula (%)</div>
+            <div style="flex:1; position:relative; min-height:0;"><canvas id="chCanMol"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div id="caCap" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- DIVISÓRIA DEMANDA -->
+  <section data-label="Seção · Demanda" data-speaker-notes="Análise de demanda (sell-out) por molécula, marca e corporação. Todas as vistas derivam da mesma base; o botão PPP/Unidades troca a métrica." style="position:relative; background:linear-gradient(120deg,#074878 0%,#0062AA 100%); overflow:hidden;">
+    <div style="position:absolute; right:-160px; bottom:-160px; width:640px; height:640px; border-radius:50%; background:rgba(0,191,223,.16);"></div>
+    <div style="position:relative; height:100%; box-sizing:border-box; padding:120px; display:flex; flex-direction:column; justify-content:center; color:#fff;">
+      <div style="font-size:200px; font-weight:700; color:rgba(255,255,255,.14); line-height:1;">02</div>
+      <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:8px 0 34px;"></div>
+      <h2 style="font-size:76px; font-weight:700; margin:0;">Demanda — Análise por Dimensão</h2>
+      <p style="font-size:32px; color:#A9D0EE; margin:24px 0 0; max-width:1100px;">Sell-out, market share e crescimento por molécula, marca e corporação — em PPP (R$) e Unidades.</p>
+    </div>
+  </section>
+
+  <!-- DEMANDA · PANORAMA -->
+  <section data-label="Panorama por dimensão" data-speaker-notes="Sell-out, market share ou crescimento por molécula, marca ou corporação — escolha a dimensão e a métrica." style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
+          <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">Panorama por dimensão</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;"><span style="display:flex; align-items:center; gap:6px;"><span style="font-size:17px; color:var(--hy-muted); font-weight:600; margin-right:2px;">Molécula:</span><button class="hy-tgl pmol-tgl" data-mo="Semaglutida" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Semaglutida</button><button class="hy-tgl pmol-tgl" data-mo="Tirzepatida" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Tirzepatida</button><button class="hy-tgl pmol-tgl" data-mo="Liraglutida" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Liraglutida</button><button class="hy-tgl pmol-tgl" data-mo="Todas" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Todas</button></span><span style="display:flex; align-items:center; gap:6px;"><span style="font-size:17px; color:var(--hy-muted); font-weight:600; margin-right:2px;">Métrica:</span><button class="hy-tgl pm-tgl" data-m="combo" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Sell-out + Market Share</button><button class="hy-tgl pm-tgl" data-m="cresc" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Crescimento</button></span><span style="display:flex; align-items:center; gap:6px;"><span style="font-size:17px; color:var(--hy-muted); font-weight:600; margin-right:2px;">Dimensão:</span><button class="hy-tgl pd-tgl" data-d="corporacao" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Corporação</button><button class="hy-tgl pd-tgl" data-d="marca" style="font-family:inherit; font-size:18px; font-weight:600; padding:6px 16px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Marca</button></span><span style="display:flex; gap:10px; align-items:center;"><button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button><button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button></span>
+        </div>
+      </div>
+      <div id="panSingle" style="flex:1; border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; position:relative; min-height:0;"><canvas id="chPan"></canvas></div>
+      <div id="panDual" style="flex:1; display:none; grid-template-columns:1fr 1fr; gap:24px; min-height:0;"><div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;" id="panT1"></div><div style="flex:1; position:relative; min-height:0;"><canvas id="chPanShare"></canvas></div></div><div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;" id="panT2"></div><div style="flex:1; position:relative; min-height:0;"><canvas id="chPanGrow"></canvas></div></div></div>
+      <div id="capPan" style="font-size:20px; color:var(--hy-body); margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <!-- DEMANDA · CONCENTRAÇÃO -->
+  <section data-label="Dosagem" data-speaker-notes="Mix de dosagem dentro de cada molécula. Semaglutida migra de 1mg para 0,5mg; Tirzepatida sobe para doses maiores. Selecione a molécula." style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
+          <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">Mix de dosagem</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;">
+        <button class="hy-tgl cm-tgl" data-m="Semaglutida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Semaglutida</button>
+        <button class="hy-tgl cm-tgl" data-m="Tirzepatida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Tirzepatida</button>
+        <span id="prodChips" style="display:contents;"><span style="font-size:18px; color:var(--hy-muted); font-weight:600; margin:0 2px 0 12px;">Produto:</span>
+        <button class="hy-tgl cm-tgl" data-m="Wegovy" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Wegovy</button>
+        <button class="hy-tgl cm-tgl" data-m="Ozempic" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Ozempic</button>
+        <button class="hy-tgl cm-tgl" data-m="Poviztra" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Poviztra</button>
+        <button class="hy-tgl cm-tgl" data-m="Rybelsus" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Rybelsus</button></span><span style="display:flex; gap:10px; align-items:center;"><button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button><button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button></span>
+        </div>
+      </div>
+      <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:24px; min-height:0;">
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;">
+          <div style="font-size:24px; font-weight:700; color:var(--hy-ink); margin-bottom:8px;">Sell-out por dosagem</div>
+          <div style="flex:1; position:relative; min-height:0;"><canvas id="chAbsConc"></canvas></div>
+        </div>
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;">
+          <div style="font-size:24px; font-weight:700; color:var(--hy-ink); margin-bottom:8px;">Representatividade (%)</div>
+          <div style="flex:1; position:relative; min-height:0;"><canvas id="chShrConc"></canvas></div>
+        </div>
+      </div>
+      <div id="capConc" style="font-size:20px; color:var(--hy-body); margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <!-- DEMANDA · CANAL -->
+  <section data-label="Canal" data-speaker-notes="Representatividade e sell-out por canal (Direto vs. Indireto) e, na visão por marca, a dependência de canal de cada produto." style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
+          <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">Canal</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;"><button class="hy-tgl cv-tgl" data-v="geral" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Visão geral</button><button class="hy-tgl cv-tgl" data-v="marca" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Por marca</button><span style="display:flex; gap:10px; align-items:center;"><button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button><button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button></span></div>
+      </div>
+      <div id="canGeral"
+      <div id="canGeral" style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:24px; min-height:0;">
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Sell-out por canal</div><div style="flex:1; position:relative; min-height:0;"><canvas id="chCanAbs"></canvas></div></div>
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Representatividade (%)</div><div style="flex:1; position:relative; min-height:0;"><canvas id="chCanShr"></canvas></div></div>
+      </div>
+      <div id="canMarcaWrap" style="flex:1; border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; position:relative; min-height:0; display:none;"><canvas id="chCanalMarca"></canvas></div>
+      <div id="capCanal" style="font-size:20px; color:var(--hy-body); margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <!-- 5 · PREÇO -->
+  <section data-label="Preço" data-speaker-notes="Preço vs. referência: desconto por dosagem (semana mais recente) e evolução semanal da dosagem selecionada." style="background:#fff;">
+    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:18px;">
+          <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
+          <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">Preço <span id="parTitle" style="color:var(--hy-blue);">— Wegovy vs. Poviztra</span></h2>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="hy-tgl p-tgl" data-p="0" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Wegovy vs. Poviztra</button>
+          <button class="hy-tgl p-tgl" data-p="1" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Ozempic vs. Extensior</button>
+        </div>
+      </div>
+      <div style="flex:1; display:grid; grid-template-columns:1fr 1.15fr; gap:28px; min-height:0;">
+        <div style="display:flex; flex-direction:column; min-height:0;">
+          <div style="font-size:24px; font-weight:700; color:var(--hy-ink); margin-bottom:10px;">Desconto por dosagem · semana atual</div>
+          <div id="tblPreco" style="flex:1; min-height:0;"></div>
+        </div>
+        <div style="display:flex; flex-direction:column; min-height:0;">
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+            <span style="font-size:24px; font-weight:700; color:var(--hy-ink);">Evolução semanal</span>
+            <span style="display:flex; gap:8px;" id="doseChips"></span>
+          </div>
+          <div style="flex:1; border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; position:relative; min-height:0;"><canvas id="chPreco"></canvas></div>
+        </div>
+      </div>
+      <div style="font-size:16px; color:var(--hy-muted); margin-top:14px;">Nota: média entre PDVs · desconto = preço médio do concorrente ÷ referência − 1.</div>
+    </div>
+  </section>
+
+</x-import>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;100%&quot; },
+  &quot;mostrarRotulos&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Gráficos&quot; },
+  &quot;mostrarEixoY&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Gráficos&quot; },
+  &quot;paleta&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;Institucional&quot;, &quot;options&quot;: [&quot;Institucional&quot;, &quot;Vibrante&quot;, &quot;Sóbrio&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Aparência&quot; },
+  &quot;estiloBarras&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;Suave&quot;, &quot;options&quot;: [&quot;Retas&quot;, &quot;Suave&quot;, &quot;Arredondadas&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Aparência&quot; }
+}">
 class Component extends DCLogic {
   componentDidMount() {
+    this._ch = {}; this.par = 0; this.dose = null;
     if (!window.BASE_EMAGRECIMENTO) { const s = document.createElement('script'); s.src = 'base-emagrecimento.js?v=' + Date.now(); document.head.appendChild(s); }
     this._wait();
   }
+
+  componentDidUpdate() {
+    if (!this._ready) return;
+    this.rotulos = this.props.mostrarRotulos ?? true;
+    this.eixoY = this.props.mostrarEixoY ?? false;
+    this._applyTweaks();
+    this._renderAll();
+  }
+
+  _applyTweaks() {
+    this.pal = this.props.paleta ?? 'Institucional';
+    window.__HY_PAL = this.pal;
+    const map = { 'Retas': 0, 'Suave': 4, 'Arredondadas': 12 };
+    this.barR = map[this.props.estiloBarras ?? 'Suave'] ?? 4;
+  }
+
+  _renderAll() { this._renderExec(); this._renderOnePage(); this._renderCorpOnePage(); this._renderCanalOnePage(); this._renderDemanda(); this._renderPreco(); this._renderInsights(); }
+
+  renderVals() { return { baixarPdf: () => window.open('relatorio-print.html', '_blank') }; }
+
+  _renderCanalOnePage() {
+    const C = window.CALC, u = this.unidade;
+    if (!this.$('#chCanHero')) return;
+    const canais = Object.keys(C.raw(u, 'canal'));
+    if (!canais.includes(this.canalSel)) this.canalSel = canais[0];
+    this._setActive('.u-tgl', b => b.dataset.u === u);
+    const unit = u === 'Unidades' ? 'Mil un' : 'R$ MM', L = C.periodos.length - 1, rot = this.rotulos;
+
+    this.$('#canChips').innerHTML = canais.map(c => {
+      const on = c === this.canalSel;
+      return `<button class="hy-tgl can-tgl" data-c="${c}" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; cursor:pointer; border:1.5px solid var(--hy-blue); background:${on ? 'var(--hy-blue)' : '#fff'}; color:${on ? '#fff' : 'var(--hy-blue)'};">${c}</button>`;
+    }).join('');
+    this.$$('.can-tgl').forEach(b => b.addEventListener('click', () => { this.canalSel = b.dataset.c; this._renderCanalOnePage(); }));
+
+    const marcas = C.ordenar(C.agrupar(u, 'marca', { canal: this.canalSel })), order = Object.keys(marcas);
+    const canTot = C.periodos.map((_, i) => Object.values(marcas).reduce((a, s) => a + s[i], 0));
+    const mkt = C.total(u);
+    const shareMkt = canTot.map((v, i) => (mkt[i] ? Math.round(v / mkt[i] * 1000) / 10 : 0));
+
+    this.$('#caKpiSellLbl').textContent = 'Sell-out (' + unit + ')';
+    this.$('#caKpiSell').textContent = (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(canTot[L], 0);
+    this.$('#caKpiShare').textContent = C.fmtNum(shareMkt[L], 1) + '%';
+    this.$('#caKpiCresc').textContent = C.fmtPct(C.ultimo(C.cresc(canTot)));
+    this.$('#caKpiCrescLbl').textContent = C.periodos.length > 12 ? 'vs. ano ant. (MAA)' : 'vs. mês ant. (MA)';
+    let lead = null; for (const [k, s] of Object.entries(marcas)) if (!lead || s[L] > lead.v) lead = { k, v: s[L] };
+    this.$('#caKpiLider').textContent = lead ? lead.k : '—';
+    const molSel = this.canalMol || 'Total';
+    this._setActive('.cmol-tgl', b => b.dataset.mo === molSel);
+    let heroMarcas = marcas, heroOrder = order, heroTot = canTot, heroShare = shareMkt;
+    if (molSel !== 'Total') {
+      const fm = {}; Object.keys(marcas).forEach(m => { if (C.mapa[m] && C.mapa[m].molecula === molSel) fm[m] = marcas[m]; });
+      heroMarcas = C.ordenar(fm); heroOrder = Object.keys(heroMarcas);
+      heroTot = C.periodos.map((_, i) => Object.values(heroMarcas).reduce((a, s) => a + s[i], 0));
+      heroShare = heroTot.map((v, i) => (mkt[i] ? Math.round(v / mkt[i] * 1000) / 10 : 0));
+    }
+    this.$('#caHeroTitle').textContent = 'Sell-out por marca — canal ' + this.canalSel + (molSel !== 'Total' ? ' · ' + molSel : '') + ' · ' + unit;
+
+    const gCanM = this._groupLira(heroMarcas), gCanO = Object.keys(gCanM);
+    this._mk('chCanHero', window.HYReport.comboConfig({ barsObj: gCanM, order: gCanO, totals: heroTot, lineLabel: 'Share no mercado (%)', lineData: heroShare, unit, barR: this.barR, alwaysTotal: true }, { periodos: C.periodos, rotulos: this.rotulos, eixoY: this.eixoY }));
+
+    { const t = this.$('#tCanMarca'); if (t) t.textContent = 'Mix por marca (%)' + (molSel !== 'Total' ? ' · ' + molSel : ''); }
+    this._stack('chCanMarca', this._subShare(heroMarcas), heroOrder, true);
+    const mol = C.ordenar(C.agrupar(u, 'molecula', { canal: this.canalSel }));
+    this._stack('chCanMol', this._subShare(mol), Object.keys(mol), true);
+  }
+
+  _renderExec() {
+    const C = window.CALC, u = 'PPP';
+    if (!this.$('#exDest')) return;
+    const L = C.periodos.length - 1, back = (a, k) => a[Math.max(0, L - k)];
+    const tot = C.total(u), molS = C.share(u, 'molecula'), segS = C.share(u, 'segmento'), corpS = C.share(u, 'corporacao');
+    const cresc = C.ultimo(C.cresc(tot));
+    this.$('#exTotal').textContent = 'R$ ' + C.fmtNum(tot[L], 0);
+    const cEl = this.$('#exCresc'); cEl.textContent = C.fmtPct(cresc) + (C.periodos.length > 12 ? ' vs. ano ant.' : ' vs. mês ant.');
+    cEl.style.color = cresc >= 0 ? 'var(--color-success)' : 'var(--color-danger)';
+    this.$('#exLider').textContent = C.fmtNum(molS['Tirzepatida'][L], 1) + '%';
+    this.$('#exTarget').textContent = C.fmtNum(segS['Segmento target'][L], 1) + '%';
+    const euf = corpS['Eurofarma'] ? corpS['Eurofarma'][L] : 0;
+    this.$('#exEuf').textContent = C.fmtNum(euf, 1) + '%';
+
+    const tShift = molS['Tirzepatida'][L] - back(molS['Tirzepatida'], 3);
+    const segShift = segS['Segmento target'][L] - back(segS['Segmento target'], 6);
+    const eufShift = euf - (corpS['Eurofarma'] ? back(corpS['Eurofarma'], 6) : 0);
+    let deal = null;
+    C.B.PRECOS.pares.forEach(par => Object.entries(par.dosagens).forEach(([dz, d]) => { const de = C.desconto(d); if (!deal || de < deal.de) deal = { par, dz, de }; }));
+
+    const bullets = [
+      'O mercado somou <b>R$ ' + C.fmtNum(tot[L], 0) + ' MM</b> em jun/26, ' + C.fmtPct(cresc) + ' ' + (C.periodos.length > 12 ? 'vs. o mesmo mês do ano anterior' : 'vs. o mês anterior') + '.',
+      '<b>Tirzepatida</b> (Mounjaro/Lilly) lidera com <b>' + C.fmtNum(molS['Tirzepatida'][L], 1) + '%</b> de share, ' + (tShift >= 0 ? 'ganhando ' : 'cedendo ') + C.fmtNum(Math.abs(tShift), 1) + ' p.p. em 3 meses.',
+      'O <b>segmento target</b> (Semaglutida ≤ 1mg) recuou para <b>' + C.fmtNum(segS['Segmento target'][L], 1) + '%</b> (' + C.fmtNum(segShift, 1) + ' p.p. em 6 meses).',
+      '<b>Eurofarma</b> avança para <b>' + C.fmtNum(euf, 1) + '%</b> de share (' + (eufShift >= 0 ? '+' : '') + C.fmtNum(eufShift, 1) + ' p.p. em 6 meses) via Poviztra e Extensior.',
+      deal ? '<b>Preço</b>: ' + deal.par.concorrente + ' pressiona ' + deal.par.referencia + ' — maior desconto de <b>' + C.fmtNum(deal.de, 0) + '%</b> (' + deal.dz + ').' : '',
+    ].filter(Boolean);
+
+    this.$('#exDest').innerHTML = bullets.map(t => `<li style="display:flex; gap:14px; align-items:flex-start; font-size:23px; color:var(--hy-body); line-height:1.45;"><span style="flex:none; width:12px; height:12px; border-radius:50%; background:var(--hy-cyan); margin-top:9px;"></span><span>${t}</span></li>`).join('');
+  }
+
+  _marcasDaCorp(u, corp) {
+    const C = window.CALC, raw = C.raw(u, 'marca'), out = {};
+    for (const [m, s] of Object.entries(raw)) if (C.mapa[m] && C.mapa[m].corporacao === corp) out[m] = s;
+    return out;
+  }
+  _molDaCorp(u, corp) {
+    const C = window.CALC, sub = this._marcasDaCorp(u, corp), out = {};
+    for (const [m, s] of Object.entries(sub)) {
+      const mol = C.mapa[m].molecula;
+      if (!out[mol]) out[mol] = s.map(() => 0);
+      s.forEach((v, i) => (out[mol][i] += v));
+    }
+    return C.ordenar(out);
+  }
+
+  _renderCorpOnePage() {
+    const C = window.CALC, u = this.unidade;
+    if (!this.$('#chCorpHero')) return;
+    const corps = Object.keys(C.raw(u, 'corporacao'));
+    if (!corps.includes(this.corp)) this.corp = corps[0];
+    this._setActive('.u-tgl', b => b.dataset.u === u);
+    const unit = u === 'Unidades' ? 'Mil un' : 'R$ MM', L = C.periodos.length - 1, rot = this.rotulos;
+
+    this.$('#corpChips').innerHTML = corps.map(c => {
+      const on = c === this.corp;
+      return `<button class="hy-tgl co-tgl" data-c="${c}" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; cursor:pointer; border:1.5px solid var(--hy-blue); background:${on ? 'var(--hy-blue)' : '#fff'}; color:${on ? '#fff' : 'var(--hy-blue)'};">${c}</button>`;
+    }).join('');
+    this.$$('.co-tgl').forEach(b => b.addEventListener('click', () => { this.corp = b.dataset.c; this._renderCorpOnePage(); }));
+
+    const marcas = C.ordenar(this._marcasDaCorp(u, this.corp)), order = Object.keys(marcas);
+    const corpTot = C.periodos.map((_, i) => Object.values(marcas).reduce((a, s) => a + s[i], 0));
+    const mkt = C.total(u);
+    const shareMkt = corpTot.map((v, i) => (mkt[i] ? Math.round(v / mkt[i] * 1000) / 10 : 0));
+
+    this.$('#coKpiSellLbl').textContent = 'Sell-out (' + unit + ')';
+    this.$('#coKpiSell').textContent = (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(corpTot[L], 0);
+    this.$('#coKpiShare').textContent = C.fmtNum(shareMkt[L], 1) + '%';
+    this.$('#coKpiCresc').textContent = C.fmtPct(C.ultimo(C.cresc(corpTot)));
+    this.$('#coKpiCrescLbl').textContent = C.periodos.length > 12 ? 'vs. ano ant. (MAA)' : 'vs. mês ant. (MA)';
+    let lead = null; for (const [k, s] of Object.entries(marcas)) if (!lead || s[L] > lead.v) lead = { k, v: s[L] };
+    this.$('#coKpiLider').textContent = lead ? lead.k : '—';
+    this.$('#coHeroTitle').textContent = 'Sell-out por marca e share no mercado · ' + unit;
+
+    const gCoM = this._groupLira(marcas), gCoO = Object.keys(gCoM);
+    this._mk('chCorpHero', window.HYReport.comboConfig({ barsObj: gCoM, order: gCoO, totals: corpTot, lineLabel: 'Share no mercado (%)', lineData: shareMkt, unit, barR: this.barR, alwaysTotal: true }, { periodos: C.periodos, rotulos: this.rotulos, eixoY: this.eixoY }));
+
+    this._stack('chCorpMarca', this._subShare(marcas), order, true);
+    const mol = this._molDaCorp(u, this.corp);
+    this._stack('chCorpMol', this._subShare(mol), Object.keys(mol), true);
+  }
+
+  // corte de marcas de uma molécula
+  _subMarca(u, mol) {
+    const C = window.CALC, raw = C.raw(u, 'marca'), out = {};
+    for (const [m, s] of Object.entries(raw)) if (C.mapa[m] && C.mapa[m].molecula === mol) out[m] = s;
+    return out;
+  }
+  _subCorp(u, mol) {
+    const C = window.CALC, sub = this._subMarca(u, mol), out = {};
+    for (const [m, s] of Object.entries(sub)) {
+      const c = C.mapa[m].corporacao;
+      if (!out[c]) out[c] = s.map(() => 0);
+      s.forEach((v, i) => (out[c][i] += v));
+    }
+    return C.ordenar(out);
+  }
+  _subShare(obj) {
+    const C = window.CALC, per = C.periodos;
+    const tot = per.map((_, i) => Object.values(obj).reduce((a, s) => a + s[i], 0));
+    const o = {};
+    for (const [k, arr] of Object.entries(obj)) o[k] = arr.map((v, i) => (tot[i] ? Math.round((v / tot[i]) * 1000) / 10 : 0));
+    return o;
+  }
+
+  _stack(id, dataObj, order, percent, extra) {
+    const C = window.CALC; extra = extra || {};
+    this._mk(id, window.HYReport.stackConfig({ dataObj, order, percent, barR: this.barR, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys }, { periodos: C.periodos, unit: this.unidade === 'Unidades' ? 'Mil un' : 'R$ MM', rotulos: this.rotulos, eixoY: this.eixoY }));
+  }
+
+  _groupLira(obj) {
+    const C = window.CALC, per = C.periodos, lira = per.map(() => 0); let has = false; const out = {};
+    Object.keys(obj).forEach(m => {
+      const isL = (C.mapa[m] && C.mapa[m].molecula === 'Liraglutida') || m === 'Saxenda/Victoza' || m === 'Olire/Lirux';
+      if (isL) { obj[m].forEach((v, i) => (lira[i] += v)); has = true; } else out[m] = obj[m];
+    });
+    if (has) out['Liraglutida'] = lira;
+    return out;
+  }
+
+  _cap(id, dataObj) {
+    const C = window.CALC, el = this.$('#' + id);
+    if (!el) return;
+    const L = C.periodos.length - 1;
+    let lead = null;
+    for (const [k, s] of Object.entries(dataObj)) if (!lead || s[L] > lead.v) lead = { k, v: s[L] };
+    const tot = C.periodos.map((_, i) => Object.values(dataObj).reduce((a, s) => a + s[i], 0));
+    const share = tot[L] ? (lead.v / tot[L] * 100) : 0;
+    const g = C.cresc(tot)[L];
+    el.innerHTML = 'Líder: <b style="color:var(--hy-blue);">' + lead.k + '</b> (' + C.fmtNum(share, 1) + '%) · mercado ' + (g != null ? C.fmtPct(g, 0) : '—') + (C.periodos.length > 12 ? ' vs. ano ant. (MAA)' : ' vs. mês ant. (MA)');
+  }
+
+  _renderDemanda() { this._renderPanorama(); this._renderConc(); this._renderCanalSec(); }
+
+  _renderPanorama() {
+    const C = window.CALC, u = this.unidade; if (!this.$('#chPan')) return;
+    this.panMol = this.panMol || 'Todas'; this.panDim = this.panDim || 'marca'; this.panMetric = this.panMetric || 'combo';
+    this._setActive('.u-tgl', x => x.dataset.u === u);
+    if (this.panMol === 'Tirzepatida') this.panDim = 'marca';
+    this._setActive('.pmol-tgl', b => b.dataset.mo === this.panMol);
+    this._setActive('.pd-tgl', b => b.dataset.d === this.panDim);
+    this._setActive('.pm-tgl', b => b.dataset.m === this.panMetric);
+    const L = C.periodos.length - 1, dim = this.panDim, filtro = this.panMol === 'Todas' ? {} : { molecula: this.panMol };
+    const raw = C.ordenar(C.agrupar(u, dim, filtro)), order = Object.keys(raw);
+    const single = this.$('#panSingle'), dual = this.$('#panDual');
+    single.style.display = 'none'; dual.style.display = 'grid';
+    const growBars = (id, fn) => { const gc = order.map(k => ({ k, v: fn(k) })).filter(o => o.v != null).sort((a, b) => b.v - a.v); this._mk(id, { type: 'bar', data: { labels: gc.map(o => o.k), datasets: [{ data: gc.map(o => o.v), backgroundColor: gc.map(o => o.v >= 0 ? '#6FA98C' : '#CB8C8C'), borderRadius: this.barR, datalabels: { display: true, anchor: 'end', align: (c) => c.dataset.data[c.dataIndex] >= 0 ? 'end' : 'start', color: '#292A2B', font: { size: 12, weight: '700' }, formatter: v => C.fmtPct(v, 0) } }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 46, left: 46 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: x => C.fmtPct(x.parsed.x) } } }, scales: { x: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 12 } } } } } }); };
+    if (this.panMetric === 'cresc') {
+      this.$('#panT1').textContent = 'Crescimento vs. mês anterior (%)';
+      this.$('#panT2').textContent = 'Crescimento vs. ano anterior — YoY (%)';
+      growBars('chPanShare', k => C.crescMA(raw[k])[L]);
+      growBars('chPanGrow', k => C.crescMAA(raw[k])[L]);
+    } else {
+      this.$('#panT1').textContent = 'Sell-out';
+      this.$('#panT2').textContent = 'Market share (%)';
+      const gRaw = dim === 'marca' ? this._groupLira(raw) : raw;
+      const gOrder = Object.keys(gRaw);
+      const totAbs = C.periodos.map((_, i) => gOrder.reduce((a, k) => a + gRaw[k][i], 0));
+      this._stack('chPanShare', gRaw, gOrder, false, { totals: totAbs, totalLabel: true, noLabelKeys: ['Liraglutida'] });
+      this._stack('chPanGrow', this._subShare(gRaw), gOrder, true, { noLabelKeys: ['Liraglutida'] });
+    }
+    const _cp = this.$('#capPan'); if (_cp) _cp.style.display = 'none';
+  }
+
+  _renderMolDetalhe() {
+    const C = window.CALC, u = this.unidade; if (!this.$('#chMdMarca')) return;
+    this.molSel = this.molSel || 'Semaglutida';
+    this._setActive('.u-tgl', b => b.dataset.u === u);
+    this._setActive('.md-tgl', b => b.dataset.m === this.molSel);
+    this.$$('.md-tgl').forEach(b => b.onclick = () => { this.molSel = b.dataset.m; this._renderMolDetalhe(); });
+    const m = C.ordenar(this._subMarca(u, this.molSel)), c = this._subCorp(u, this.molSel);
+    this._stack('chMdMarca', this._subShare(m), Object.keys(m), true);
+    this._stack('chMdCorp', this._subShare(c), Object.keys(c), true);
+    this._cap('capMd', m);
+  }
+
+  _renderCanalSec() {
+    const C = window.CALC, u = this.unidade; if (!this.$('#canGeral')) return;
+    this.canalView = this.canalView || 'geral';
+    this._setActive('.u-tgl', b => b.dataset.u === u);
+    this._setActive('.cv-tgl', b => b.dataset.v === this.canalView);
+    this.$$('.cv-tgl').forEach(b => b.onclick = () => { this.canalView = b.dataset.v; this._renderCanalSec(); });
+    const geral = this.canalView === 'geral';
+    this.$('#canGeral').style.display = geral ? 'grid' : 'none';
+    this.$('#canMarcaWrap').style.display = geral ? 'none' : 'block';
+    if (geral) { const raw = C.raw(u, 'canal'), order = ['Indireto', 'Direto']; this._stack('chCanAbs', raw, order, false); this._stack('chCanShr', C.share(u, 'canal'), order, true); this._cap('capCanal', raw); }
+    else { this._renderCanalMarca(); this.$('#capCanal').textContent = ''; }
+  }
+
+  _absFromRep(rep, total) {
+    const per = window.CALC.periodos, keys = Object.keys(rep), out = {};
+    keys.forEach(k => out[k] = []);
+    for (let i = 0; i < per.length; i++) { const s = keys.reduce((a, k) => a + rep[k][i], 0) || 1; keys.forEach(k => out[k].push(Math.round(total[i] * rep[k][i] / s * 10) / 10)); }
+    return out;
+  }
+
+  _renderConc() {
+    const C = window.CALC, u = this.unidade, V = C.B.VENDAS[u].concentracao, CP = C.B.CONC_PRODUTO;
+    if (!this.$('#chAbsConc') || !V) return;
+    if (!V[this.concMol] && !(CP && CP[this.concMol])) this.concMol = 'Semaglutida';
+    this._setActive('.cm-tgl', b => b.dataset.m === this.concMol); { const pc = this.$('#prodChips'); if (pc) pc.style.display = this.concMol === 'Tirzepatida' ? 'none' : 'contents'; }
+    let obj;
+    if (V[this.concMol]) obj = V[this.concMol];
+    else { const total = C.raw(u, 'marca')[this.concMol] || C.periodos.map(() => 0); obj = this._absFromRep(CP[this.concMol], total); }
+    const order = Object.keys(obj);
+    this._stack('chAbsConc', obj, order, false);
+    this._stack('chShrConc', this._subShare(obj), order, true);
+    this._cap('capConc', obj);
+  }
+
+  _renderSC() {
+    const C = window.CALC, u = this.unidade;
+    if (!this.$('#chScAbs')) return;
+    const dims = { molecula: 'Molécula', marca: 'Marca', corporacao: 'Corporação' };
+    if (!dims[this.scDim]) this.scDim = 'marca';
+    this._setActive('.sc-tgl', b => b.dataset.d === this.scDim);
+    const raw = this.scDim === 'corporacao' ? C.raw(u, this.scDim) : C.ordenar(C.raw(u, this.scDim));
+    const order = Object.keys(raw);
+    this._stack('chScAbs', raw, order, false);
+    const ds = order.map(k => ({ label: k, data: C.crescMA(raw[k]), borderColor: C.cor(k), backgroundColor: C.cor(k), borderWidth: 2.5, tension: .3, pointRadius: 2, spanGaps: true, datalabels: { display: false } }));
+    this._mk('chScCresc', {
+      type: 'line', data: { labels: C.periodos, datasets: ds },
+      options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtPct(x.parsed.y) } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 13 } }, y: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } } } }
+    });
+    this._cap('capSc', raw);
+  }
+
+  _renderCanalMarca() {
+    const C = window.CALC;
+    if (!this.$('#chCanalMarca')) return;
+    const cm = C.B.CANAL_MARCA, L = C.periodos.length - 1, brands = Object.keys(cm);
+    const dir = brands.map(b => cm[b][L]), ind = dir.map(v => Math.round((100 - v) * 10) / 10);
+    const dl = (color) => this.rotulos ? { display: true, color, font: { size: 12, weight: '700' }, formatter: v => C.fmtNum(v, 0) + '%' } : { display: false };
+    this._mk('chCanalMarca', {
+      type: 'bar', data: { labels: brands, datasets: [
+        { label: 'Direto', data: dir, backgroundColor: C.cor('Direto'), stack: 's', datalabels: dl('#fff') },
+        { label: 'Indireto', data: ind, backgroundColor: C.cor('Indireto'), stack: 's', datalabels: dl('#074878') } ] },
+      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtNum(x.parsed.y, 0) + '%' } } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 13 } } }, y: { stacked: true, display: false, max: 100 } } }
+    });
+  }
+
+  _renderInsights() {
+    const C = window.CALC, u = 'PPP', box = this.$('#insightsBox');
+    if (!box) return;
+    const per = C.periodos, L = per.length - 1;
+    const back = (arr, k) => arr[Math.max(0, L - k)];
+    const tot = C.total(u);
+    const molS = C.share(u, 'molecula'), segS = C.share(u, 'segmento'), corpS = C.share(u, 'corporacao');
+    const marcaRaw = C.raw(u, 'marca');
+    const maa = C.crescMAA(tot)[L], ma = C.crescMA(tot)[L];
+
+    // marca em maior aceleração (MoM) entre marcas relevantes
+    let best = null;
+    for (const [k, s] of Object.entries(marcaRaw)) {
+      if (C.ultimo(s) < 20) continue;
+      const g = C.crescMA(s)[L];
+      if (g != null && (!best || g > best.g)) best = { k, g, v: C.ultimo(s) };
+    }
+    // maior desconto médio em preço
+    let deal = null;
+    C.B.PRECOS.pares.forEach(par => Object.entries(par.dosagens).forEach(([dz, d]) => {
+      const desc = C.desconto(d);
+      if (!deal || desc < deal.desc) deal = { par, dz, desc, med: C.precoMedia(d) };
+    }));
+    const tShift = molS['Tirzepatida'][L] - back(molS['Tirzepatida'], 3);
+    const segShift = segS['Segmento target'][L] - back(segS['Segmento target'], 6);
+    const eurNow = corpS['Eurofarma'] ? corpS['Eurofarma'][L] : 0;
+    const eurBack = corpS['Eurofarma'] ? back(corpS['Eurofarma'], 6) : 0;
+
+    const card = (accent, tag, metric, title, text) => `
+      <div style="border:1px solid var(--hy-border); border-radius:14px; padding:26px 28px; display:flex; flex-direction:column; border-top:5px solid ${accent};">
+        <div style="font-size:17px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:${accent};">${tag}</div>
+        <div style="font-size:52px; font-weight:700; color:var(--hy-ink); line-height:1.05; margin:8px 0 4px;">${metric}</div>
+        <div style="font-size:23px; font-weight:700; color:var(--hy-ink); margin-bottom:8px;">${title}</div>
+        <div style="font-size:20px; color:var(--hy-body); line-height:1.45;">${text}</div>
+      </div>`;
+
+    box.innerHTML = [
+      card('#0062AA', 'Mercado', 'R$ ' + C.fmtNum(C.ultimo(tot), 0) + ' MM',
+        'Tamanho do mercado em jun/26',
+        (maa != null ? C.fmtPct(maa) + ' vs. o mesmo mês do ano anterior' : C.fmtPct(ma) + ' vs. o mês anterior') + '.'),
+      card('#074878', 'Liderança', C.fmtNum(C.ultimo(molS['Tirzepatida']), 1) + '%',
+        'Tirzepatida consolida a liderança',
+        'Market share ' + (tShift >= 0 ? 'subiu ' : 'recuou ') + C.fmtNum(Math.abs(tShift), 1) + ' p.p. em 3 meses.'),
+      card('#D64545', 'Atenção', C.fmtNum(C.ultimo(segS['Segmento target']), 1) + '%',
+        'Segmento target sob pressão',
+        'Semaglutida ≤ 1mg ' + (segShift < 0 ? 'perdeu ' : 'ganhou ') + C.fmtNum(Math.abs(segShift), 1) + ' p.p. de share em 6 meses.'),
+      best ? card('#1E9E63', 'Momento', C.fmtPct(best.g, 0),
+        best.k + ' é o destaque de crescimento',
+        'Maior avanço de sell-out no último mês, com R$ ' + C.fmtNum(best.v, 0) + ' MM.') : '',
+      card('#00BFDF', 'Concorrência', C.fmtNum(eurNow, 1) + '%',
+        'Eurofarma ganha espaço',
+        'Share por corporação ' + (eurNow - eurBack >= 0 ? '+' : '') + C.fmtNum(eurNow - eurBack, 1) + ' p.p. em 6 meses, via Poviztra e Extensior.'),
+      deal ? card('#0062AA', 'Preço', C.fmtNum(deal.desc, 0) + '%',
+        deal.par.concorrente + ' pressiona ' + deal.par.referencia,
+        'Maior desconto: ' + deal.dz + ' a ' + C.fmtR$(deal.med, 0) + ' vs. ' + deal.par.referencia + '.') : '',
+    ].join('');
+  }
+
   _wait(n = 0) {
-    if (window.BASE_EMAGRECIMENTO && document.getElementById('inpRef')) return this._init();
-    if (n > 100) return; setTimeout(() => this._wait(n + 1), 60);
+    const ready = window.Chart && window.CALC && window.BASE_EMAGRECIMENTO &&
+      document.querySelector('#kpiTotal') && document.querySelector('#tblPreco') && document.querySelector('#doseChips');
+    if (ready) return this._init();
+    if (n > 200) return;
+    setTimeout(() => this._wait(n + 1), 60);
   }
+
   _init() {
-    this.base = JSON.parse(JSON.stringify(window.BASE_EMAGRECIMENTO));
-    const B = this.base, $ = id => document.getElementById(id); this.$ = $;
-    this.cols = B.COLUNAS || ['marca', 'molecula', 'corporacao', 'periodo', 'canal', 'dosagem', 'target', 'PPP', 'unidades'];
-    this.colsPre = B.COLUNAS_PRECO || ['marca', 'referencia', 'dosagem', 'periodo', 'rede', 'valor'];
-    this.iPer = this.cols.indexOf('periodo'); this.iPPP = this.cols.indexOf('PPP'); this.iUn = this.cols.indexOf('unidades'); this.iCPP = this.cols.indexOf('CPP');
-    // estado inicial = base atual (permite regerar sem reimportar)
-    this._dados = (B.FATOS || []).map(r => r.slice());
-    this._pre = (B.PRECOS_FATOS || []).map(r => r.slice());
-    this._periodos = (B.META.periodos || []).slice();
-    $('inpRef').value = B.META.referencia || '';
-    $('inpAt').value = B.META.atualizadoEm || '';
-
-    $('btnGen').addEventListener('click', () => this._generate());
-    $('btnDl').addEventListener('click', () => this._download());
-    $('btnPub').addEventListener('click', () => this._publish());
-    const handle = f => { if (/\.xls[xmb]?$/i.test(f.name)) this._importWB(f); else f.text().then(t => this._fillDados(t, f.name)); };
-    $('inpFile').addEventListener('change', e => { const f = e.target.files[0]; if (f) handle(f); });
-    const dz = $('dropZone');
-    ['dragover', 'dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.background = 'var(--hy-blue-bg)'; }));
-    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.style.background = '#fff'; }));
-    dz.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handle(f); });
-    this._perInfo();
-  }
-
-  _perInfo() {
-    this.$('perInfo').innerHTML = `<b>${this._periodos.length}</b> períodos · <b>${this._dados.length}</b> linhas de dados · <b>${this._pre.length}</b> linhas de preço na base carregada.`;
-  }
-  _num(s) { s = String(s).trim().replace(/R\$|\s|%/g, ''); if (s === '' || s === '-' || s === '—') return 0; if (s.includes('.') && s.includes(',')) s = s.replace(/\./g, '').replace(',', '.'); else if (s.includes(',')) s = s.replace(',', '.'); const v = parseFloat(s); return isNaN(v) ? null : v; }
-  _splitCSVLine(line, delim) { const out = []; let cur = '', q = false; for (let i = 0; i < line.length; i++) { const c = line[i]; if (q) { if (c === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; } else if (c === '"') q = true; else if (c === delim) { out.push(cur); cur = ''; } else cur += c; } out.push(cur); return out.map(s => s.trim()); }
-  _csvRows(text) { const lines = text.split(/\r?\n/).filter(l => l.trim()); if (!lines.length) return []; const d = lines[0].includes('\t') ? '\t' : (lines[0].split(';').length > lines[0].split(',').length ? ';' : ','); return lines.map(l => this._splitCSVLine(l, d)); }
-
-  _fillDados(text, name) {
-    const info = this.$('impInfo');
-    try {
-      const rows = this._csvRows(text); if (!rows.length) throw new Error('vazio');
-      const header = rows[0].map(c => c.toLowerCase().trim());
-      if (!header.includes('marca')) throw new Error('cabeçalho sem a coluna "marca"');
-      const srcIx = {}; header.forEach((h, i) => { if (srcIx[h] == null) srcIx[h] = i; });
-      const at = (col) => { let si = srcIx[col.toLowerCase()]; if (si == null && col === 'dosagem') si = srcIx['concentracao']; return si; };
-      const CANON = ['marca', 'molecula', 'corporacao', 'periodo', 'canal', 'dosagem', 'target', 'PPP', 'CPP', 'unidades'];
-      // colunas na ordem canônica, apenas as presentes no arquivo (CPP surge só se existir)
-      this.cols = CANON.filter(c => at(c) != null);
-      this.iPer = this.cols.indexOf('periodo'); this.iPPP = this.cols.indexOf('PPP'); this.iUn = this.cols.indexOf('unidades'); this.iCPP = this.cols.indexOf('CPP');
-      const iMarcaSrc = srcIx['marca'];
-      const body = rows.slice(1).filter(r => r[iMarcaSrc] && r[iMarcaSrc].trim())
-        .map(r => this.cols.map(c => { const si = at(c); return String(si != null && r[si] != null ? r[si] : '').trim(); }));
-      this._dados = body;
-      const pers = []; body.forEach(r => { const p = (r[this.iPer] || '').trim(); if (p && !pers.includes(p)) pers.push(p); });
-      if (pers.length) { this._periodos = pers; this.$('inpRef').value = pers[pers.length - 1]; }
-      this._perInfo();
-      info.style.color = 'var(--color-success)';
-      info.innerHTML = `✓ <b>${name}</b>: ${body.length} linhas · ${pers.length} períodos${this.iCPP >= 0 ? ' · com CPP' : ''}. Preço: ${this._pre.length} linhas. Clique em <b>Validar e gerar base</b>.`;
-    } catch (e) { info.style.color = 'var(--color-danger)'; info.textContent = 'Falha: ' + e.message; }
-  }
-  _fillPre(text) {
-    const rows = this._csvRows(text); if (!rows.length) return 0;
-    const hasH = rows[0].map(c => c.toLowerCase()).includes('marca');
-    this._pre = rows.slice(hasH ? 1 : 0).filter(r => r[0] && r[0].trim()).map(r => r.slice(0, this.colsPre.length));
-    return this._pre.length;
-  }
-  _importWB(f) {
-    const info = this.$('impInfo');
-    if (!window.XLSX) { info.style.color = 'var(--color-danger)'; info.textContent = 'Leitor de Excel não carregou. Exporte as abas como CSV.'; return; }
-    f.arrayBuffer().then(ab => {
-      const wb = window.XLSX.read(ab, { type: 'array' }); let dados = null, pre = 0;
-      wb.SheetNames.forEach(sn => { const low = sn.toLowerCase(), csv = window.XLSX.utils.sheet_to_csv(wb.Sheets[sn]); if (/dado/.test(low)) dados = { csv, sn }; else if (/pre[cç]/.test(low)) pre = this._fillPre(csv); });
-      if (dados) this._fillDados(dados.csv, f.name + ' › ' + dados.sn);
-      else { info.style.color = 'var(--color-danger)'; info.textContent = 'Excel sem aba "Dados".'; }
-    }).catch(e => { info.style.color = 'var(--color-danger)'; info.textContent = 'Falha ao ler Excel: ' + e.message; });
-  }
-
-  _generate() {
-    const errs = [], per = this._periodos;
-    if (per.length < 2) errs.push('Base com menos de 2 períodos — importe o Excel.');
-    const NC = this.cols.length, FATOS = [];
-    this._dados.forEach((r, i) => {
-      if (!r[0] || !r[0].trim()) return;
-      if (r.length < NC) { errs.push('Dados linha ' + (i + 1) + ': menos de ' + NC + ' colunas'); return; }
-      const pp = this._num(r[this.iPPP]), un = this._num(r[this.iUn]);
-      if (pp === null || un === null) { errs.push('Dados linha ' + (i + 1) + ': PPP/unidades não numérico'); return; }
-      let cpp = 0;
-      if (this.iCPP >= 0) { cpp = this._num(r[this.iCPP]); if (cpp === null) { errs.push('Dados linha ' + (i + 1) + ': CPP não numérico'); return; } }
-      const pe = (r[this.iPer] || '').trim();
-      if (!per.includes(pe)) errs.push('Período fora da lista: "' + pe + '" (linha ' + (i + 1) + ')');
-      FATOS.push(this.cols.map((c, k) => (k === this.iPPP ? pp : k === this.iUn ? un : k === this.iCPP ? cpp : (r[k] || '').trim())));
+    Chart.defaults.font.family = "'Asap', sans-serif";
+    Chart.defaults.font.size = 13;
+    Chart.defaults.color = '#5D5F61';
+    Chart.defaults.animation = false;
+    Chart.defaults.set('plugins.tooltip', {
+      backgroundColor: 'rgba(7,72,120,.96)', titleColor: '#fff', bodyColor: '#EDF6FC',
+      titleFont: { family: "'Asap', sans-serif", size: 14, weight: '700' },
+      bodyFont: { family: "'Asap', sans-serif", size: 13 },
+      padding: 12, cornerRadius: 8, boxPadding: 6, usePointStyle: true,
+      borderColor: 'rgba(0,191,223,.55)', borderWidth: 1
     });
-    if (!FATOS.length) errs.push('Nenhuma linha de dados.');
-    const NCP = this.colsPre.length, iVal = this.colsPre.indexOf('valor'), PF = [];
-    this._pre.forEach((r, i) => {
-      if (!r[0] || !r[0].trim()) return;
-      if (r.length < NCP) { errs.push('Preço linha ' + (i + 1) + ': menos de ' + NCP + ' colunas'); return; }
-      const v = this._num(r[iVal]);
-      if (v === null) { errs.push('Preço linha ' + (i + 1) + ': valor não numérico'); return; }
-      PF.push(this.colsPre.map((c, k) => k === iVal ? v : (r[k] || '').trim()));
-    });
-    if (!PF.length) errs.push('Nenhuma linha de preço.');
+    if (window.ChartDataLabels) Chart.register(window.ChartDataLabels);
+    Chart.defaults.set('plugins.datalabels', { display: false });
 
-    const vp = this.$('valPanel'); vp.style.display = 'block';
-    const uniqErr = [...new Set(errs)];
-    if (uniqErr.length) {
-      vp.innerHTML = `<div style="font-size:16px; font-weight:700; color:var(--color-danger); margin-bottom:10px;">${uniqErr.length} problema(s)</div><ul style="margin:0; padding-left:20px; font-size:14px;">${uniqErr.slice(0, 40).map(e => `<li style="margin-bottom:4px;">${e}</li>`).join('')}</ul>`;
-      this.$('btnDl').disabled = true; this.$('btnDl').style.opacity = '.5'; this.$('btnPub').disabled = true; this.$('btnPub').style.opacity = '.5'; this.$('status').textContent = ''; return;
-    }
-    const META = { ...this.base.META, referencia: this.$('inpRef').value.trim(), atualizadoEm: this.$('inpAt').value.trim(), periodos: per };
-    const header = `/* BASE ÚNICA (tabela de fatos — modelo Excel) — Mercado de Emagrecimento GLP-1 | Hypera Pharma\n * Colunas: ${this.cols.join(', ')}.\n * Preço: ${this.colsPre.join(', ')}. Visões agregadas por calc.js.\n * Gerado pelo Atualizador em ${new Date().toLocaleString('pt-BR')} · ${FATOS.length} linhas · ref. ${META.referencia}. Substitua no GitHub. */\n`;
-    this._file = header + 'window.BASE_EMAGRECIMENTO = {\n  META: ' + JSON.stringify(META) + ',\n  CORP: ' + JSON.stringify(this.base.CORP) + ',\n  COLUNAS: ' + JSON.stringify(this.cols) + ',\n  FATOS: [\n' + FATOS.map(r => '    ' + JSON.stringify(r)).join(',\n') + '\n  ],\n  COLUNAS_PRECO: ' + JSON.stringify(this.colsPre) + ',\n  PRECOS_FATOS: [\n' + PF.map(r => '    ' + JSON.stringify(r)).join(',\n') + '\n  ]\n};\n';
-    const marcas = new Set(FATOS.map(r => r[0])).size;
-    vp.innerHTML = `<div style="font-size:16px; font-weight:700; color:var(--color-success); margin-bottom:8px;">✓ Base válida</div><div style="font-size:14px;">${FATOS.length} linhas · ${per.length} períodos · ${marcas} marcas · ${PF.length} linhas de preço. Clique em <b>Baixar</b>.</div>`;
-    this.$('btnDl').disabled = false; this.$('btnDl').style.opacity = '1'; this.$('btnPub').disabled = false; this.$('btnPub').style.opacity = '1'; this.$('status').textContent = 'Pronto para baixar ou publicar no GitHub.';
+    this.unidade = 'PPP';
+    this.rotulos = this.props.mostrarRotulos ?? true;
+    this.eixoY = this.props.mostrarEixoY ?? false;
+    this._applyTweaks();
+    this.$ = (sel) => document.querySelector(sel);
+    this.$$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    const _applyUnit = (u) => { this.unidade = u; this._renderOnePage(); this._renderCorpOnePage(); this._renderCanalOnePage(); this._renderDemanda(); };
+    this.$$('.u-tgl').forEach(b => b.addEventListener('click', () => _applyUnit(b.dataset.u)));
+    // Selo de período padronizado + 3ª métrica CPP (surge só quando a base tem a coluna)
+    { const _M = window.BASE_EMAGRECIMENTO.META || {}; const _per = (_M.referencia || '') + (_M.parcial ? ' · parcial' : '');
+      const _cr = document.getElementById('capaRef'); if (_cr) _cr.textContent = 'Referência: ' + _per;
+      const _ca = document.getElementById('capaAt'); if (_ca && _M.atualizadoEm) _ca.textContent = 'Atualizado em ' + _M.atualizadoEm;
+      const _hasCPP = window.CALC.hasCPP; const _seen = new Set();
+      this.$$('.u-tgl,.p-tgl').forEach(b => { const g = b.parentNode; if (_seen.has(g)) return; _seen.add(g);
+        const s = document.createElement('span'); s.style.cssText = 'align-self:center;font-size:20px;font-weight:600;color:var(--hy-blue);background:var(--hy-blue-bg);border:1px solid #A9D0EE;padding:7px 18px;border-radius:800px;margin-right:4px;white-space:nowrap;'; s.textContent = _per; b.before(s);
+        if (_hasCPP && b.classList.contains('u-tgl')) { const ub = g.querySelector('.u-tgl[data-u="Unidades"]'); const cpp = document.createElement('button'); cpp.className = 'hy-tgl u-tgl'; cpp.dataset.u = 'CPP'; if (ub) cpp.setAttribute('style', ub.getAttribute('style')); cpp.textContent = 'CPP (R$ MM)'; cpp.addEventListener('click', () => _applyUnit('CPP')); g.appendChild(cpp); }
+      }); }
+    this.$$('.p-tgl').forEach(b => b.addEventListener('click', () => { this.par = +b.dataset.p; this.dose = null; this._renderPreco(); }));
+    this.canalMol = 'Total';
+    this.$$('.cmol-tgl').forEach(b => b.addEventListener('click', () => { this.canalMol = b.dataset.mo; this._renderCanalOnePage(); }));
+    
+    this.concMol = 'Semaglutida';
+    this.$$('.cm-tgl').forEach(b => b.addEventListener('click', () => { this.concMol = b.dataset.m; this._renderConc(); }));
+    this.corp = 'Novo Nordisk';
+    this.canalSel = 'Indireto';
+    this.__panDeleg = true;
+    document.addEventListener('click', (ev) => { const b = ev.target.closest && ev.target.closest('.pmol-tgl,.pd-tgl,.pm-tgl'); if (!b) return; if (b.classList.contains('pmol-tgl')) this.panMol = b.dataset.mo; else if (b.classList.contains('pd-tgl')) this.panDim = b.dataset.d; else this.panMetric = b.dataset.m; this._renderPanorama(); });
+    this.scDim = 'marca';
+    this.$$('.sc-tgl').forEach(b => b.addEventListener('click', () => { this.scDim = b.dataset.d; this._renderSC(); }));
+
+    this._ready = true;
+    this._renderAll();
+    this._selPid = 0;
+    document.addEventListener('click', () => document.querySelectorAll('.hy-dd[data-open="1"]').forEach(o => o.removeAttribute('data-open')));
+    this._upgradeDropdowns();
+    this._selObs = new MutationObserver(() => { if (this._upgrading) return; clearTimeout(this._selT); this._selT = setTimeout(() => this._upgradeDropdowns(), 40); });
+    this._selObs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+    // segunda passada após o layout assentar (corrige dimensionamento de canvas)
+    setTimeout(() => { if (this._ready) { this._renderAll(); Object.values(this._ch).forEach(c => c && c.resize()); this._upgradeDropdowns(); } }, 220);
   }
-  _download() { if (this._file) { this._save('base-emagrecimento.js', this._file, 'text/javascript'); this.$('status').textContent = 'Baixado — substitua no GitHub.'; } }
-  async _publish() {
-    if (!this._file) return;
-    const owner = 'lucasfsmaia', repo = 'friendly-giggle', branch = 'main', path = 'base-emagrecimento.js';
-    let tok = localStorage.getItem('hy_gh_token');
-    if (!tok) { tok = (prompt('Cole o token do GitHub (fine-grained PAT, permissao Contents: Read and write neste repositorio). Fica salvo apenas neste navegador.') || '').trim(); if (!tok) return; localStorage.setItem('hy_gh_token', tok); }
-    const st = this.$('status'); st.style.color = 'var(--hy-muted)'; st.textContent = 'Publicando...';
-    const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-    const hdr = { 'Authorization': 'Bearer ' + tok, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+
+  _setActive(sel, match) {
+    this.$$(sel).forEach(b => {
+      const on = match(b);
+      b.style.background = on ? 'var(--hy-blue)' : '#fff';
+      b.style.color = on ? '#fff' : 'var(--hy-blue)';
+      b.style.borderColor = 'var(--hy-blue)';
+    });
+  }
+
+  // Converte cada grupo de botões-seletor (.*-tgl) em um dropdown custom (.hy-dd), mantendo os botões (ocultos) como fonte da verdade.
+  _upgradeDropdowns() {
+    if (this._upgrading) return;
+    this._upgrading = true;
     try {
-      let sha;
-      const g = await fetch(`${api}?ref=${branch}`, { headers: hdr });
-      if (g.status === 200) sha = (await g.json()).sha;
-      else if (g.status !== 404) throw new Error('GET ' + g.status);
-      const bytes = new TextEncoder().encode(this._file); let bin = '';
-      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-      const body = { message: 'Atualiza base-emagrecimento.js (' + (this.$('inpAt').value.trim() || new Date().toISOString().slice(0, 10)) + ')', content: btoa(bin), branch };
-      if (sha) body.sha = sha;
-      const p = await fetch(api, { method: 'PUT', headers: hdr, body: JSON.stringify(body) });
-      if (!p.ok) { const e = await p.json().catch(() => ({})); throw new Error('PUT ' + p.status + ' ' + (e.message || '')); }
-      st.style.color = 'var(--color-success)'; st.textContent = '\u2713 Publicado no GitHub \u2014 o site republica em ~1 min (veja a aba Actions).';
-    } catch (err) {
-      const s = String(err); if (s.includes('401') || s.includes('403')) localStorage.removeItem('hy_gh_token');
-      st.style.color = 'var(--color-danger)'; st.textContent = 'Falha ao publicar: ' + err.message + '. Verifique token/permissoes.';
+      const groups = new Map();
+      document.querySelectorAll('.hy-tgl').forEach(b => {
+        const cls = Array.from(b.classList).find(c => c !== 'hy-tgl' && c.endsWith('-tgl'));
+        if (!cls) return;
+        const p = b.parentNode; if (!p) return;
+        if (!p.__selId) p.__selId = 'g' + (++this._selPid);
+        const key = cls + '::' + p.__selId;
+        let g = groups.get(key); if (!g) { g = { parent: p, cls, btns: [] }; groups.set(key, g); }
+        g.btns.push(b);
+      });
+      groups.forEach((g, key) => {
+        const labels = g.btns.map(b => (b.textContent || '').trim());
+        let ai = g.btns.findIndex(b => getComputedStyle(b).backgroundColor === 'rgb(0, 98, 170)');
+        if (ai < 0) ai = 0;
+        let dd = Array.from(g.parent.children).find(el => el.classList && el.classList.contains('hy-dd') && el.getAttribute('data-key') === key);
+        if (!dd) {
+          dd = document.createElement('div');
+          dd.className = 'hy-dd'; dd.setAttribute('data-key', key); dd.setAttribute('data-uneditable', '');
+          const btn = document.createElement('button');
+          btn.className = 'hy-dd-btn';
+          btn.innerHTML = '<span class="hy-dd-lbl"></span><span class="hy-dd-caret"></span>';
+          const list = document.createElement('div'); list.className = 'hy-dd-list';
+          dd.appendChild(btn); dd.appendChild(list);
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const open = dd.getAttribute('data-open') === '1';
+            document.querySelectorAll('.hy-dd[data-open="1"]').forEach(o => o.removeAttribute('data-open'));
+            if (!open) dd.setAttribute('data-open', '1');
+          });
+          g.btns[0].before(dd);
+        }
+        const lblEl = dd.querySelector('.hy-dd-lbl'); if (lblEl) lblEl.textContent = labels[ai] || '';
+        const list = dd.querySelector('.hy-dd-list');
+        const want = labels.join('\u0001');
+        if (dd.__opts !== want) {
+          list.innerHTML = '';
+          labels.forEach((l, i) => {
+            const o = document.createElement('div');
+            o.className = 'hy-dd-opt'; o.textContent = l;
+            o.addEventListener('click', (e) => {
+              e.stopPropagation();
+              dd.removeAttribute('data-open');
+              const live = Array.from(g.parent.querySelectorAll('.' + g.cls));
+              const t = live.find(b => (b.textContent || '').trim() === l) || live[i];
+              if (t) t.click();
+            });
+            list.appendChild(o);
+          });
+          dd.__opts = want;
+        }
+        Array.from(list.children).forEach((o, i) => { if (i === ai) o.setAttribute('aria-selected', '1'); else o.removeAttribute('aria-selected'); });
+        g.btns.forEach(b => { if (b.style.display !== 'none') b.style.display = 'none'; });
+      });
+    } finally {
+      requestAnimationFrame(() => { this._upgrading = false; });
     }
   }
-  _save(name, content, type) { const b = new Blob([content], { type }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+
+  _mk(id, cfg) {
+    const el = this.$('#' + id);
+    if (!el) return;
+    const ex = Chart.getChart(el);
+    if (ex) ex.destroy();
+    this._ch[id] = new Chart(el.getContext('2d'), cfg);
+  }
+
+  _light(color) { return ['#A9D0EE', '#C6D9E6', '#3E9BD6', '#00BFDF', '#8FB4CE'].includes(color); }
+
+  // ---------- ONE PAGE ----------
+  _renderOnePage() {
+    const C = window.CALC, u = this.unidade;
+    this._setActive('.u-tgl', b => b.dataset.u === u);
+    const unit = u === 'Unidades' ? 'Mil un' : 'R$ MM';
+    const per = C.periodos, tot = C.total(u), last = per.length - 1;
+
+    const molShare = C.share(u, 'molecula');
+    const segShare = C.share(u, 'segmento');
+    this.$('#kpiTotalLbl').textContent = 'Mercado total (' + unit + ')';
+    this.$('#kpiTotal').textContent = (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(C.ultimo(tot), u === 'Unidades' ? 0 : 1);
+    const dMA = C.crescMA(tot), d = dMA[dMA.length - 1], dEl = this.$('#kpiTotalD');
+    dEl.textContent = C.fmtPct(d) + ' vs. mês ant.';
+    dEl.style.color = d >= 0 ? 'var(--color-success)' : 'var(--color-danger)';
+    this.$('#kpiCresc').textContent = C.fmtPct(C.ultimo(C.cresc(tot)));
+    this.$('#kpiCrescLbl').textContent = per.length > 12 ? 'vs. mesmo mês ano ant. (MAA)' : 'vs. mês anterior (MA)';
+    this.$('#kpiLider').textContent = C.fmtNum(C.ultimo(molShare['Tirzepatida']), 1) + '%';
+    this.$('#kpiTarget').textContent = C.fmtNum(C.ultimo(segShare['Segmento target']), 1) + '%';
+    this.$('#kpiTgtCresc').textContent = C.fmtPct(C.ultimo(C.crescMAA(C.raw(u, 'segmento')['Segmento target'])));
+    this.$('#heroTitle').textContent = 'Mercado total vs. segmento target · ' + unit;
+
+    // HERO
+    const seg = C.raw(u, 'segmento');
+    const rot = this.rotulos;
+    this._mk('chHero', window.HYReport.comboConfig({ barsObj: seg, order: ['Segmento target', 'Outros'], totals: tot, segLabel: true, unit, barR: this.barR }, { periodos: per, rotulos: this.rotulos, eixoY: this.eixoY }));
+
+    this._shareChart('chMarca', C.share(u, 'marcaTop'), ['Mounjaro', 'Wegovy', 'Poviztra', 'Ozempic', 'Outros']);
+    this._shareChart('chMol', C.share(u, 'molecula'), Object.keys(C.raw(u, 'molecula')));
+    this._shareChart('chCorp', C.share(u, 'corporacao'), Object.keys(C.raw(u, 'corporacao')));
+  }
+
+  _shareChart(id, shareObj, order) {
+    const C = window.CALC, last = C.periodos.length - 1, rot = this.rotulos;
+    const ds = order.filter(k => shareObj[k]).map(k => {
+      const col = C.cor(k);
+      return {
+        label: k, data: shareObj[k], backgroundColor: col, stack: 's', borderWidth: 0,
+        datalabels: rot
+          ? { display: (ctx) => (ctx.dataIndex === 0 || ctx.dataIndex === last) && ctx.dataset.data[ctx.dataIndex] >= 6, color: this._light(col) ? '#074878' : '#fff', font: { size: 12, weight: '700' }, formatter: (v) => C.fmtNum(v, 0) + '%' }
+          : { display: false }
+      };
+    });
+    this._mk(id, {
+      type: 'bar',
+      data: { labels: C.periodos, datasets: ds },
+      options: this._baseOpts({ stacked: true, percent: true, compact: true })
+    });
+  }
+
+  _baseOpts(o) {
+    return window.HYReport.baseOpts(o, { rotulos: this.rotulos, eixoY: this.eixoY, animation: true });
+  }
+
+  // ---------- PREÇO (conciso) ----------
+  _renderPreco() {
+    const C = window.CALC, P = C.B.PRECOS, par = P.pares[this.par || 0];
+    if (!this.$('#tblPreco')) return;
+    this._setActive('.p-tgl', b => +b.dataset.p === (this.par || 0));
+    this.$('#parTitle').textContent = '— ' + par.referencia + ' vs. ' + par.concorrente;
+    const rows = Object.entries(par.dosagens).map(([dose, d]) => {
+      const med = C.precoMedia(d), desc = C.desconto(d);
+      const dc = desc <= -30 ? 'var(--color-success)' : (desc < 0 ? 'var(--hy-blue)' : 'var(--color-danger)');
+      return `<tr style="border-bottom:1px solid var(--hy-border);"><td style="padding:16px 14px;font-size:25px;font-weight:700;color:var(--hy-ink);">${dose}</td><td style="padding:16px 14px;font-size:23px;text-align:right;color:var(--hy-body);">${C.fmtR$(d.ref,0)}</td><td style="padding:16px 14px;font-size:23px;text-align:right;font-weight:600;color:var(--hy-blue);">${C.fmtR$(med,0)}</td><td style="padding:16px 14px;text-align:right;"><span style="font-size:25px;font-weight:700;color:${dc};">${C.fmtPct(desc)}</span></td></tr>`;
+    }).join('');
+    this.$('#tblPreco').innerHTML = `<table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid var(--hy-blue);"><th style="padding:12px 14px;text-align:left;font-size:19px;color:var(--hy-muted);font-weight:600;">Dosagem</th><th style="padding:12px 14px;text-align:right;font-size:19px;color:var(--hy-muted);font-weight:600;">${par.referencia}</th><th style="padding:12px 14px;text-align:right;font-size:19px;color:var(--hy-muted);font-weight:600;">${par.concorrente}</th><th style="padding:12px 14px;text-align:right;font-size:19px;color:var(--hy-muted);font-weight:600;">Desconto</th></tr></thead><tbody>${rows}</tbody></table>`;
+    const doses = Object.keys(par.dosagens);
+    if (!this.dose || !doses.includes(this.dose)) this.dose = doses[0];
+    this.$('#doseChips').innerHTML = doses.map(dz => { const on = dz === this.dose; return `<button class="hy-tgl dz-chip" data-d="${dz}" style="font-family:inherit;font-size:18px;font-weight:600;padding:6px 16px;border-radius:800px;cursor:pointer;border:1.5px solid var(--hy-blue);background:${on ? 'var(--hy-blue)' : '#fff'};color:${on ? '#fff' : 'var(--hy-blue)'};">${dz}</button>`; }).join('');
+    this.$$('.dz-chip').forEach(b => b.addEventListener('click', () => { this.dose = b.dataset.d; this._renderPreco(); }));
+    const d = par.dosagens[this.dose], rot = this.rotulos;
+    const dl = (align, color) => rot ? { display: true, align, color, font: { size: 12, weight: '700' }, formatter: v => C.fmtR$(v, 0) } : { display: false };
+    this._mk('chPreco', { type: 'line', data: { labels: P.semanas, datasets: [
+      { label: par.referencia + ' (ref.)', data: d.evRef, borderColor: C.cor('Preço ref.'), backgroundColor: C.cor('Preço ref.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: dl('top', '#074878') },
+      { label: par.concorrente, data: d.evConc, borderColor: C.cor('Preço conc.'), backgroundColor: C.cor('Preço conc.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: dl('bottom', '#0062AA') } ] },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, layout: { padding: { top: 20, bottom: 8 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtR$(x.parsed.y, 0) } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 14 } } }, y: { display: this.eixoY, grid: { display: this.eixoY, color: '#EFEFEF' }, ticks: { font: { size: 13 }, callback: v => C.fmtR$(v, 0) }, beginAtZero: false } } } });
+  }
 }
 </script>
 </body>
