@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&amp;display=swap">
+  <script src="_ds/hypera-pharma-design-system-e2c335aa-af70-4a79-b177-492cc92cb02a/_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="calc.js"></script>
+  <script src="report-charts.js"></script>
+</helmet>
+<div style="font-family:'Asap',sans-serif;">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#074878"></rect><g transform="translate(30,32)"><rect x="0" y="20" width="8" height="16" rx="1.5" fill="#00BFDF"></rect><rect x="12" y="10" width="8" height="26" rx="1.5" fill="#A9D0EE"></rect><rect x="24" y="2" width="8" height="34" rx="1.5" fill="#fff"></rect></g></svg></template>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+  <section data-label="Capa" style="position:relative; overflow:hidden; background:#074878;">
+    <img src="assets/cover-blue-textured.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.55;">
+    <div style="position:absolute; inset:0; background:linear-gradient(105deg, rgba(7,72,120,.94) 0%, rgba(0,98,170,.78) 55%, rgba(0,191,223,.35) 100%);"></div>
+    <div style="position:relative; height:100%; box-sizing:border-box; padding:110px 120px; display:flex; flex-direction:column; justify-content:space-between; color:#fff;">
+      
+      <div>
+        <div style="display:inline-block; font-size:22px; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; font-weight:600; margin-bottom:26px;">Inteligência de Mercado · Farma · Versão completa (impressão)</div>
+        <h1 style="font-size:88px; line-height:1.04; font-weight:700; margin:0; max-width:1250px;">Mercado de Emagrecimento<br>GLP-1</h1>
+        <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:38px 0 30px;"></div>
+        <p id="pcapaSub" style="font-size:34px; font-weight:500; margin:0; color:#EDF6FC;">Todas as visões · PPP (R$) e Unidades · FMB IQVIA (30 dias)</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span id="pcapaRef" style="font-size:26px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 24px; border-radius:800px;">Referência: jun/26 · parcial</span>
+        <span id="pcapaAt" style="font-size:22px; color:#A9D0EE;">Atualizado em 14/jul/26</span>
+      </div>
+    </div>
+  </section>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    if (!window.BASE_EMAGRECIMENTO) { const s = document.createElement('script'); s.src = 'base-emagrecimento.js?v=' + Date.now(); document.head.appendChild(s); }
+    this._wait();
+  }
+  _wait(n = 0) {
+    if (window.Chart && window.CALC && window.BASE_EMAGRECIMENTO && document.querySelector('deck-stage')) return this._build();
+    if (n > 200) return;
+    setTimeout(() => this._wait(n + 1), 60);
+  }
+
+  _build() {
+    const C = window.CALC, stage = document.querySelector('deck-stage');
+    if (window.ChartDataLabels) Chart.register(window.ChartDataLabels);
+    Chart.defaults.font.family = "'Asap', sans-serif";
+    Chart.defaults.color = '#5D5F61';
+    Chart.defaults.animation = false;
+    Chart.defaults.set('plugins.tooltip', {
+      backgroundColor: 'rgba(7,72,120,.96)', titleColor: '#fff', bodyColor: '#EDF6FC',
+      titleFont: { family: "'Asap', sans-serif", size: 14, weight: '700' },
+      bodyFont: { family: "'Asap', sans-serif", size: 13 },
+      padding: 12, cornerRadius: 8, boxPadding: 6, usePointStyle: true,
+      borderColor: 'rgba(0,191,223,.55)', borderWidth: 1
+    });
+    let uid = 0;
+    const jobs = [];
+    const light = (c) => ['#A9D0EE', '#C6D9E6', '#3E9BD6', '#00BFDF', '#8FB4CE', '#7FB2D9', '#5AA0CF'].includes(c);
+    const uLbl = (u) => u === 'PPP' ? 'PPP (R$ MM)' : u === 'CPP' ? 'CPP (R$ MM)' : 'Unidades (Mil)';
+
+    const subShare = (obj) => {
+      const per = C.periodos, tot = per.map((_, i) => Object.values(obj).reduce((a, s) => a + s[i], 0)), o = {};
+      for (const [k, arr] of Object.entries(obj)) o[k] = arr.map((v, i) => tot[i] ? Math.round(v / tot[i] * 1000) / 10 : 0);
+      return o;
+    };
+    const subMarca = (u, mol) => { const raw = C.raw(u, 'marca'), o = {}; for (const [m, s] of Object.entries(raw)) if (C.mapa[m].molecula === mol) o[m] = s; return o; };
+    const subCorpBy = (u, mol) => { const sub = subMarca(u, mol), o = {}; for (const [m, s] of Object.entries(sub)) { const c = C.mapa[m].corporacao; if (!o[c]) o[c] = s.map(() => 0); s.forEach((v, i) => o[c][i] += v); } return C.ordenar(o); };
+    const marcasCorp = (u, corp) => { const raw = C.raw(u, 'marca'), o = {}; for (const [m, s] of Object.entries(raw)) if (C.mapa[m].corporacao === corp) o[m] = s; return o; };
+    const molCorp = (u, corp) => { const sub = marcasCorp(u, corp), o = {}; for (const [m, s] of Object.entries(sub)) { const ml = C.mapa[m].molecula; if (!o[ml]) o[ml] = s.map(() => 0); s.forEach((v, i) => o[ml][i] += v); } return C.ordenar(o); };
+
+    const stack = (el, dataObj, order, percent) => {
+      new Chart(el.getContext('2d'), window.HYReport.stackConfig({ dataObj, order, percent, barR: 0 }, { periodos: C.periodos, unit: 'R$ MM', rotulos: true, eixoY: false, animation: false, tooltip: false, maxTicks: 13 }));
+    };
+    const capOf = (obj) => {
+      const L = C.periodos.length - 1; let lead = null;
+      for (const [k, s] of Object.entries(obj)) if (!lead || s[L] > lead.v) lead = { k, v: s[L] };
+      const tot = C.periodos.map((_, i) => Object.values(obj).reduce((a, s) => a + s[i], 0));
+      const g = C.cresc(tot)[L];
+      return 'Líder: <b style="color:#0062AA;">' + lead.k + '</b> (' + C.fmtNum(tot[L] ? lead.v / tot[L] * 100 : 0, 1) + '%) · mercado ' + (g != null ? C.fmtPct(g, 0) : '—') + (C.periodos.length > 12 ? ' vs. ano ant. (MAA)' : ' vs. mês ant. (MA)');
+    };
+
+    const push = (el) => stage.appendChild(el);
+    const _M = window.BASE_EMAGRECIMENTO.META || {};
+    const perTxt = (_M.referencia || '') + (_M.parcial ? ' · parcial' : '');
+    const selo = (u) => (u ? uLbl(u) + ' · ' : '') + perTxt;
+    const seloHtml = (u) => { const pill = (t) => `<span style="flex:none;font-size:22px;font-weight:600;color:#0062AA;background:#EDF6FC;border:1px solid #A9D0EE;padding:8px 20px;border-radius:800px;white-space:nowrap;">${t}</span>`; return `<span style="display:flex;align-items:center;gap:10px;flex:none;">${u ? pill(uLbl(u)) : ''}${pill(perTxt)}</span>`; };
+    const hdr = (title, mb = 20, u = null) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 ${mb}px;"><div style="display:flex;align-items:center;gap:18px;min-width:0;"><div style="width:6px;height:42px;background:#00BFDF;border-radius:800px;flex:none;"></div><h2 style="font-size:44px;font-weight:700;color:#292A2B;margin:0;">${title}</h2></div>${seloHtml(u)}</div>`;
+    { const _cr = document.getElementById('pcapaRef'); if (_cr) _cr.textContent = 'Referência: ' + perTxt; const _ca = document.getElementById('pcapaAt'); if (_ca && _M.atualizadoEm) _ca.textContent = 'Atualizado em ' + _M.atualizadoEm; const _ps = document.getElementById('pcapaSub'); if (_ps) _ps.textContent = 'Todas as visões · ' + (C.hasCPP ? 'PPP (R$), CPP (R$) e Unidades' : 'PPP (R$) e Unidades') + ' · FMB IQVIA (30 dias)'; }
+    const twoPanel = (label, title, lt, lf, rt, rf, cap, u) => {
+      const s = document.createElement('section'); s.setAttribute('data-label', label); s.style.cssText = 'background:#fff;';
+      const l = 'c' + (uid++), r = 'c' + (uid++);
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
+        ${hdr(title, 20, u)}
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:24px;min-height:0;">
+          <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:24px;font-weight:700;color:#292A2B;margin-bottom:8px;">${lt}</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${l}"></canvas></div></div>
+          <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:24px;font-weight:700;color:#292A2B;margin-bottom:8px;">${rt}</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${r}"></canvas></div></div>
+        </div>
+        <div style="font-size:20px;color:#434445;margin-top:14px;">${cap || ''}</div></div>`;
+      push(s); jobs.push(() => { lf(document.getElementById(l)); rf(document.getElementById(r)); });
+    };
+    const divider = (num, title, sub) => {
+      const s = document.createElement('section'); s.setAttribute('data-label', 'Seção · ' + title);
+      s.style.cssText = 'position:relative;background:linear-gradient(120deg,#074878 0%,#0062AA 100%);overflow:hidden;';
+      s.innerHTML = `<div style="position:absolute;right:-160px;bottom:-160px;width:640px;height:640px;border-radius:50%;background:rgba(0,191,223,.16);"></div>
+        <div style="position:relative;height:100%;box-sizing:border-box;padding:120px;display:flex;flex-direction:column;justify-content:center;color:#fff;">
+          <div style="font-size:200px;font-weight:700;color:rgba(255,255,255,.14);line-height:1;">${num}</div>
+          <div style="width:96px;height:6px;background:#00BFDF;border-radius:800px;margin:8px 0 34px;"></div>
+          <h2 style="font-size:76px;font-weight:700;margin:0;">${title}</h2>
+          <p style="font-size:32px;color:#A9D0EE;margin:24px 0 0;max-width:1100px;">${sub}</p></div>`;
+      push(s);
+    };
+
+    const segPage = (u) => {
+      const raw = C.raw(u, 'segmento'), tot = C.total(u), L = C.periodos.length - 1, g = C.cresc(tot)[L];
+      const seg = C.share(u, 'segmento');
+      const cap = 'Mercado total ' + (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(tot[L], 0) + ' ' + (u === 'Unidades' ? 'Mil' : 'MM') + ' · segmento target ' + C.fmtNum(seg['Segmento target'][L], 1) + '% · crescimento ' + (g != null ? C.fmtPct(g, 0) : '—');
+      twoPanel('Mercado · ' + u, 'Mercado total vs. segmento target', 'Sell-out', el => stack(el, { 'Segmento target': raw['Segmento target'], 'Outros': raw['Outros'] }, ['Segmento target', 'Outros'], false), 'Representatividade (%)', el => stack(el, seg, ['Segmento target', 'Outros'], true), cap, u);
+    };
+    const dimPage = (u, dim, name) => {
+      const raw = (dim === 'corporacao' || dim === 'canal') ? C.raw(u, dim) : C.ordenar(C.raw(u, dim));
+      const order = dim === 'canal' ? ['Indireto', 'Direto'] : Object.keys(raw);
+      twoPanel(name + ' · ' + u, name + ' — sell-out e market share', 'Sell-out', el => stack(el, raw, order, false), 'Market share (%)', el => stack(el, C.share(u, dim), order, true), capOf(raw), u);
+    };
+    const subPage = (u, mol) => {
+      const m = C.ordenar(subMarca(u, mol)), c = subCorpBy(u, mol);
+      twoPanel(mol + ' · ' + u, mol + ' — marca e corporação', 'Market share por marca (%)', el => stack(el, subShare(m), Object.keys(m), true), 'Market share por corporação (%)', el => stack(el, subShare(c), Object.keys(c), true), capOf(m), u);
+    };
+    const concPage = (u, mol) => {
+      const obj = C.B.VENDAS[u].concentracao[mol], order = Object.keys(obj);
+      twoPanel('Conc ' + mol + ' · ' + u, 'Dosagem — ' + mol, 'Sell-out por dosagem', el => stack(el, obj, order, false), 'Representatividade (%)', el => stack(el, subShare(obj), order, true), capOf(obj), u);
+    };
+    const corpPage = (u, corp) => {
+      const marcas = C.ordenar(marcasCorp(u, corp)), order = Object.keys(marcas);
+      const tot = C.periodos.map((_, i) => Object.values(marcas).reduce((a, s) => a + s[i], 0)), mkt = C.total(u), L = C.periodos.length - 1;
+      const g = C.cresc(tot)[L];
+      const cap = 'Sell-out ' + (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(tot[L], 0) + ' ' + (u === 'Unidades' ? 'Mil' : 'MM') + ' · share no mercado ' + C.fmtNum(mkt[L] ? tot[L] / mkt[L] * 100 : 0, 1) + '% · crescimento ' + (g != null ? C.fmtPct(g, 0) : '—');
+      twoPanel('Corp ' + corp + ' · ' + u, 'One Page Corporação — ' + corp, 'Sell-out por marca', el => stack(el, marcas, order, false), 'Mix por marca (%)', el => stack(el, subShare(marcas), order, true), cap, u);
+    };
+
+    const canalOPPage = (u, canal) => {
+      const marcas = C.ordenar(C.agrupar(u, 'marca', { canal })), order = Object.keys(marcas);
+      const tot = C.periodos.map((_, i) => Object.values(marcas).reduce((a, s) => a + s[i], 0)), mkt = C.total(u), L = C.periodos.length - 1;
+      const g = C.cresc(tot)[L];
+      const cap = 'Sell-out ' + (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(tot[L], 0) + ' ' + (u === 'Unidades' ? 'Mil' : 'MM') + ' · share no mercado ' + C.fmtNum(mkt[L] ? tot[L] / mkt[L] * 100 : 0, 1) + '% · crescimento ' + (g != null ? C.fmtPct(g, 0) : '—');
+      twoPanel('Canal ' + canal + ' · ' + u, 'One Page Canal — ' + canal, 'Sell-out por marca', el => stack(el, marcas, order, false), 'Mix por marca (%)', el => stack(el, subShare(marcas), order, true), cap, u);
+    };
+
+    const precoConc = (par, dose) => {
+      const s = document.createElement('section'); s.setAttribute('data-label', 'Preço ' + par.concorrente + ' ' + dose); s.style.cssText = 'background:#fff;';
+      const cid = 'c' + (uid++);
+      const rows = Object.entries(par.dosagens).map(([dz, d]) => { const med = C.precoMedia(d), desc = C.desconto(d), on = dz === dose; const dc = desc <= -30 ? '#1E9E63' : (desc < 0 ? '#0062AA' : '#D64545'); return `<tr style="border-bottom:1px solid #EFEFEF;background:${on ? '#EDF6FC' : '#fff'};"><td style="padding:14px;font-size:24px;font-weight:700;color:#292A2B;">${dz}</td><td style="padding:14px;font-size:22px;text-align:right;color:#434445;">${C.fmtR$(d.ref, 0)}</td><td style="padding:14px;font-size:22px;text-align:right;font-weight:600;color:#0062AA;">${C.fmtR$(med, 0)}</td><td style="padding:14px;text-align:right;"><span style="font-size:24px;font-weight:700;color:${dc};">${C.fmtPct(desc)}</span></td></tr>`; }).join('');
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
+        ${hdr('Preço — ' + par.referencia + ' vs. ' + par.concorrente, 6, null)}
+        <p style="font-size:22px;color:#5D5F61;margin:0 0 18px;">Desconto por dosagem · evolução semanal (${dose})</p>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1.15fr;gap:28px;min-height:0;">
+          <div><table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid #0062AA;"><th style="padding:12px;text-align:left;font-size:19px;color:#5D5F61;font-weight:600;">Dosagem</th><th style="padding:12px;text-align:right;font-size:19px;color:#5D5F61;font-weight:600;">${par.referencia}</th><th style="padding:12px;text-align:right;font-size:19px;color:#5D5F61;font-weight:600;">${par.concorrente}</th><th style="padding:12px;text-align:right;font-size:19px;color:#5D5F61;font-weight:600;">Desconto</th></tr></thead><tbody>${rows}</tbody></table></div>
+          <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;position:relative;min-height:0;"><canvas id="${cid}"></canvas></div>
+        </div></div>`;
+      push(s);
+      jobs.push(() => { const d = par.dosagens[dose]; new Chart(document.getElementById(cid).getContext('2d'), { type: 'line', data: { labels: C.B.PRECOS.semanas, datasets: [ { label: par.referencia + ' (ref.)', data: d.evRef, borderColor: C.cor('Preço ref.'), backgroundColor: C.cor('Preço ref.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: { display: true, align: 'top', color: '#074878', font: { size: 12, weight: '700' }, formatter: v => C.fmtR$(v, 0) } }, { label: par.concorrente, data: d.evConc, borderColor: C.cor('Preço conc.'), backgroundColor: C.cor('Preço conc.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: { display: true, align: 'bottom', color: '#0062AA', font: { size: 12, weight: '700' }, formatter: v => C.fmtR$(v, 0) } } ] }, options: { responsive: true, maintainAspectRatio: false, animation: false, layout: { padding: { top: 20, bottom: 8 } }, plugins: { legend: { position: 'bottom', labels: { font: { size: 15 }, padding: 14 } }, tooltip: { enabled: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 14 } } }, y: { display: false, beginAtZero: false } } } }); });
+    };
+
+    const snapPage = (par) => {
+      const s = document.createElement('section'); s.setAttribute('data-label', 'Preço ' + par.referencia); s.style.cssText = 'background:#fff;';
+      const rows = Object.entries(par.dosagens).map(([dz, d]) => {
+        const med = C.precoMedia(d), desc = C.desconto(d), menor = Math.min(...d.porPdv);
+        const dc = desc <= -30 ? '#1E9E63' : (desc < 0 ? '#0062AA' : '#D64545');
+        return `<tr style="border-bottom:1px solid #EFEFEF;"><td style="padding:18px 16px;font-size:26px;font-weight:700;color:#292A2B;">${dz}</td><td style="padding:18px 16px;font-size:24px;text-align:right;color:#434445;">${C.fmtR$(d.ref, 0)}</td><td style="padding:18px 16px;font-size:24px;text-align:right;font-weight:600;color:#0062AA;">${C.fmtR$(med, 0)}</td><td style="padding:18px 16px;font-size:24px;text-align:right;color:#5D5F61;">${C.fmtR$(menor, 0)}</td><td style="padding:18px 16px;text-align:right;"><span style="font-size:26px;font-weight:700;color:${dc};">${C.fmtPct(desc)}</span></td></tr>`;
+      }).join('');
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
+        ${hdr('Preço por dosagem — ' + par.referencia + ' vs. ' + par.concorrente, 24, null)}
+        <table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid #0062AA;">
+          <th style="padding:14px 16px;text-align:left;font-size:20px;color:#5D5F61;font-weight:600;">Dosagem</th><th style="padding:14px 16px;text-align:right;font-size:20px;color:#5D5F61;font-weight:600;">${par.referencia} (ref.)</th><th style="padding:14px 16px;text-align:right;font-size:20px;color:#5D5F61;font-weight:600;">${par.concorrente} · média</th><th style="padding:14px 16px;text-align:right;font-size:20px;color:#5D5F61;font-weight:600;">Menor PDV</th><th style="padding:14px 16px;text-align:right;font-size:20px;color:#5D5F61;font-weight:600;">Desconto</th>
+        </tr></thead><tbody>${rows}</tbody></table></div>`;
+      push(s);
+    };
+    const evolPage = (par, dz) => {
+      const P = C.B.PRECOS, d = par.dosagens[dz]; const cid = 'c' + (uid++);
+      const s = document.createElement('section'); s.setAttribute('data-label', 'Preço ' + par.concorrente + ' ' + dz); s.style.cssText = 'background:#fff;';
+      const rows = P.semanas.map((wk, i) => { const med = d.evConc[i], desc = (med / d.evRef[i] - 1) * 100, prev = i > 0 ? (med / d.evConc[i - 1] - 1) * 100 : null; const pc = prev == null ? '#5D5F61' : (prev < 0 ? '#1E9E63' : (prev > 0 ? '#D64545' : '#5D5F61')); return `<tr style="border-bottom:1px solid #EFEFEF;"><td style="padding:13px 12px;font-size:21px;font-weight:600;color:#292A2B;">${wk}</td><td style="padding:13px 12px;font-size:21px;text-align:right;color:#0062AA;font-weight:600;">${C.fmtR$(med, 0)}</td><td style="padding:13px 12px;font-size:21px;text-align:right;color:#434445;">${C.fmtNum(desc, 1)}%</td><td style="padding:13px 12px;font-size:21px;text-align:right;color:${pc};">${prev == null ? '—' : C.fmtPct(prev)}</td></tr>`; }).join('');
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
+        ${hdr('Evolução de preço — ' + par.referencia + ' vs. ' + par.concorrente + ' · ' + dz, 18, null)}
+        <div style="flex:1;display:grid;grid-template-columns:1.5fr 1fr;gap:24px;min-height:0;">
+          <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;position:relative;min-height:0;"><canvas id="${cid}"></canvas></div>
+          <div><table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid #0062AA;"><th style="padding:12px;text-align:left;font-size:18px;color:#5D5F61;font-weight:600;">Semana</th><th style="padding:12px;text-align:right;font-size:18px;color:#5D5F61;font-weight:600;">Média</th><th style="padding:12px;text-align:right;font-size:18px;color:#5D5F61;font-weight:600;">Desc.</th><th style="padding:12px;text-align:right;font-size:18px;color:#5D5F61;font-weight:600;">Δ sem.</th></tr></thead><tbody>${rows}</tbody></table></div>
+        </div></div>`;
+      push(s);
+      jobs.push(() => new Chart(document.getElementById(cid).getContext('2d'), {
+        type: 'line', data: { labels: P.semanas, datasets: [
+          { label: par.referencia + ' (ref.)', data: d.evRef, borderColor: C.cor('Preço ref.'), backgroundColor: C.cor('Preço ref.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: { display: true, align: 'top', color: '#074878', font: { size: 12, weight: '700' }, formatter: v => C.fmtR$(v, 0) } },
+          { label: par.concorrente, data: d.evConc, borderColor: C.cor('Preço conc.'), backgroundColor: C.cor('Preço conc.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: { display: true, align: 'bottom', color: '#0062AA', font: { size: 12, weight: '700' }, formatter: v => C.fmtR$(v, 0) } } ] },
+        options: { responsive: true, maintainAspectRatio: false, animation: false, layout: { padding: { top: 22, bottom: 8 } }, plugins: { legend: { position: 'bottom', labels: { font: { size: 15 }, padding: 16 } }, tooltip: { enabled: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 14 } } }, y: { display: false, beginAtZero: false } } }
+      }));
+    };
+
+    const absFromRep = (rep, total) => { const per = C.periodos, keys = Object.keys(rep), out = {}; keys.forEach(k => out[k] = []); for (let i = 0; i < per.length; i++) { const s = keys.reduce((a, k) => a + rep[k][i], 0) || 1; keys.forEach(k => out[k].push(Math.round(total[i] * rep[k][i] / s * 10) / 10)); } return out; };
+    const lineGrowth = (el, raw, order) => { const ds = order.map(k => ({ label: k, data: C.crescMA(raw[k]), borderColor: C.cor(k), backgroundColor: C.cor(k), borderWidth: 2.5, tension: .3, pointRadius: 2, spanGaps: true, datalabels: { display: false } })); new Chart(el.getContext('2d'), { type: 'line', data: { labels: C.periodos, datasets: ds }, options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } }, tooltip: { enabled: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 13 } }, y: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } } } } }); };
+    const scPage = (u, dim, name) => { const raw = dim === 'corporacao' ? C.raw(u, dim) : C.ordenar(C.raw(u, dim)), order = Object.keys(raw); twoPanel('Cresc ' + name + ' · ' + u, 'Sell-out e crescimento — ' + name, 'Sell-out', el => stack(el, raw, order, false), 'Crescimento vs. mês ant. (%)', el => lineGrowth(el, raw, order), capOf(raw), u); };
+    const concProdPage = (u, prod) => { const total = C.raw(u, 'marca')[prod] || C.periodos.map(() => 0), obj = absFromRep(C.B.CONC_PRODUTO[prod], total), order = Object.keys(obj); twoPanel('Conc ' + prod + ' · ' + u, 'Dosagem — ' + prod + ' (produto)', 'Sell-out por dosagem', el => stack(el, obj, order, false), 'Representatividade (%)', el => stack(el, subShare(obj), order, true), capOf(obj), u); };
+    const onePanel = (label, title, sub, fn, u) => { const s = document.createElement('section'); s.setAttribute('data-label', label); s.style.cssText = 'background:#fff;'; const id = 'c' + (uid++); s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">${hdr(title, 6, u)}<p style="font-size:22px;color:#5D5F61;margin:0 0 18px;">${sub}</p><div style="flex:1;border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;position:relative;min-height:0;"><canvas id="${id}"></canvas></div></div>`; push(s); jobs.push(() => fn(document.getElementById(id))); };
+    const canalMarcaPage = () => { onePanel('Canal por marca', 'Representatividade de canal por marca', 'Direto (DLV+VGR) vs. Indireto (VIN+VMA+VMR)', el => { const cm = C.B.CANAL_MARCA, L = C.periodos.length - 1, brands = Object.keys(cm), dir = brands.map(b => cm[b][L]), ind = dir.map(v => Math.round((100 - v) * 10) / 10); new Chart(el.getContext('2d'), { type: 'bar', data: { labels: brands, datasets: [ { label: 'Direto', data: dir, backgroundColor: C.cor('Direto'), stack: 's', datalabels: { display: true, color: '#fff', font: { size: 12, weight: '700' }, formatter: v => C.fmtNum(v, 0) + '%' } }, { label: 'Indireto', data: ind, backgroundColor: C.cor('Indireto'), stack: 's', datalabels: { display: true, color: '#074878', font: { size: 12, weight: '700' }, formatter: v => C.fmtNum(v, 0) + '%' } } ] }, options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 14 } } }, tooltip: { enabled: false } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 13 } } }, y: { stacked: true, display: false, max: 100 } } } }); }); };
+
+    const execPage = () => {
+      const u = 'PPP', L = C.periodos.length - 1, back = (a, k) => a[Math.max(0, L - k)];
+      const tot = C.total(u), molS = C.share(u, 'molecula'), segS = C.share(u, 'segmento'), corpS = C.share(u, 'corporacao');
+      const cresc = C.ultimo(C.cresc(tot)), euf = corpS['Eurofarma'] ? corpS['Eurofarma'][L] : 0;
+      const tShift = molS['Tirzepatida'][L] - back(molS['Tirzepatida'], 3), segShift = segS['Segmento target'][L] - back(segS['Segmento target'], 6), eufShift = euf - (corpS['Eurofarma'] ? back(corpS['Eurofarma'], 6) : 0);
+      let deal = null; C.B.PRECOS.pares.forEach(par => Object.entries(par.dosagens).forEach(([dz, d]) => { const de = C.desconto(d); if (!deal || de < deal.de) deal = { par, dz, de }; }));
+      const kpi = (lbl, val, sub) => `<div style="background:#fff;border:1px solid #EFEFEF;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:19px;color:#5D5F61;font-weight:600;">${lbl}</div><div style="font-size:48px;font-weight:700;color:#0062AA;line-height:1.1;">${val}</div><div style="font-size:18px;color:#5D5F61;">${sub}</div></div>`;
+      const bl = [
+        'O mercado somou <b>R$ ' + C.fmtNum(tot[L], 0) + ' MM</b> em jun/26, ' + C.fmtPct(cresc) + ' vs. o mesmo mês do ano anterior.',
+        '<b>Tirzepatida</b> (Mounjaro/Lilly) lidera com <b>' + C.fmtNum(molS['Tirzepatida'][L], 1) + '%</b>, ' + (tShift >= 0 ? 'ganhando ' : 'cedendo ') + C.fmtNum(Math.abs(tShift), 1) + ' p.p. em 3 meses.',
+        'O <b>segmento target</b> (Semaglutida ≤ 1mg) recuou para <b>' + C.fmtNum(segS['Segmento target'][L], 1) + '%</b> (' + C.fmtNum(segShift, 1) + ' p.p. em 6 meses).',
+        '<b>Eurofarma</b> avança para <b>' + C.fmtNum(euf, 1) + '%</b> (' + (eufShift >= 0 ? '+' : '') + C.fmtNum(eufShift, 1) + ' p.p. em 6 meses) via Poviztra e Extensior.',
+        deal ? '<b>Preço</b>: ' + deal.par.concorrente + ' pressiona ' + deal.par.referencia + ' — maior desconto de <b>' + C.fmtNum(deal.de, 0) + '%</b> (' + deal.dz + ').' : '',
+      ].filter(Boolean).map(t => `<li style="display:flex;gap:14px;align-items:flex-start;font-size:23px;color:#434445;line-height:1.45;"><span style="flex:none;width:12px;height:12px;border-radius:50%;background:#00BFDF;margin-top:9px;"></span><span>${t}</span></li>`).join('');
+      const s = document.createElement('section'); s.setAttribute('data-label', 'Sumário executivo'); s.style.cssText = 'background:#EDF6FC;';
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
+        ${hdr('Sumário executivo', 24, null)}
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:20px;">
+          ${kpi('Mercado total (R$ MM)', 'R$ ' + C.fmtNum(tot[L], 0), C.fmtPct(cresc) + ' vs. ano ant.')}
+          ${kpi('Líder · Tirzepatida', C.fmtNum(molS['Tirzepatida'][L], 1) + '%', 'market share')}
+          ${kpi('Segmento target', C.fmtNum(segS['Segmento target'][L], 1) + '%', 'Semaglutida ≤ 1mg')}
+          ${kpi('Eurofarma', C.fmtNum(euf, 1) + '%', 'share por corporação')}
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #EFEFEF;border-radius:14px;padding:30px 36px;">
+          <div style="font-size:24px;font-weight:700;color:#292A2B;margin-bottom:16px;">Destaques do mês</div>
+          <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:16px;">${bl}</ul>
+        </div></div>`;
+      push(s);
+    };
+
+    const onePageComposite = (u) => {
+      const unit = u === 'Unidades' ? 'Mil un' : 'R$ MM', L = C.periodos.length - 1;
+      const tot = C.total(u), molS = C.share(u, 'molecula'), segS = C.share(u, 'segmento');
+      const d = C.crescMA(tot)[L], cres = C.ultimo(C.cresc(tot));
+      const s = document.createElement('section'); s.setAttribute('data-label', 'One Page · ' + u); s.style.cssText = 'background:#fff;';
+      const idH = 'c' + (uid++), idMa = 'c' + (uid++), idMo = 'c' + (uid++), idCo = 'c' + (uid++);
+      const kpi = (lbl, val, sub, subc) => `<div style="background:#EDF6FC;border:1px solid #EFEFEF;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:19px;color:#5D5F61;font-weight:600;">${lbl}</div><div style="font-size:46px;font-weight:700;color:#0062AA;line-height:1.1;">${val}</div><div style="font-size:18px;color:${subc || '#5D5F61'};">${sub}</div></div>`;
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px;"><div style="display:flex;align-items:center;gap:18px;min-width:0;"><div style="width:6px;height:42px;background:#00BFDF;border-radius:800px;flex:none;"></div><h2 style="font-size:44px;font-weight:700;color:#292A2B;margin:0;">One Page — Mercado de Emagrecimento</h2></div>${seloHtml(u)}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:20px;">
+          ${kpi('Mercado total (' + unit + ')', (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(tot[L], u === 'Unidades' ? 0 : 1), C.fmtPct(d) + ' vs. mês ant.', d >= 0 ? '#1E9E63' : '#D64545')}
+          ${kpi('Crescimento mercado', C.fmtPct(cres), C.periodos.length > 12 ? 'vs. ano ant. (MAA)' : 'vs. mês ant. (MA)')}
+          ${kpi('Líder · Tirzepatida', C.fmtNum(molS['Tirzepatida'][L], 1) + '%', 'market share')}
+          ${kpi('Segmento target', C.fmtNum(segS['Segmento target'][L], 1) + '%', 'Semaglutida ≤ 1mg')}
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:1.35fr 1fr;gap:22px;min-height:0;">
+          <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:24px;font-weight:700;color:#292A2B;margin-bottom:12px;">Mercado total vs. segmento target · ${unit}</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${idH}"></canvas></div></div>
+          <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:16px;min-height:0;">
+            <div style="border:1px solid #EFEFEF;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:20px;font-weight:700;color:#292A2B;margin-bottom:6px;">Market share por marca (%)</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${idMa}"></canvas></div></div>
+            <div style="border:1px solid #EFEFEF;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:20px;font-weight:700;color:#292A2B;margin-bottom:6px;">Market share por molécula (%)</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${idMo}"></canvas></div></div>
+            <div style="border:1px solid #EFEFEF;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:20px;font-weight:700;color:#292A2B;margin-bottom:6px;">Market share por corporação (%)</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${idCo}"></canvas></div></div>
+          </div>
+        </div>
+        <div style="font-size:16px;color:#5D5F61;margin-top:14px;">Nota: Mercado total (considera patentes) · Fonte: FMB IQVIA Jun/26 (30 dias).</div>
+      </div>`;
+      push(s);
+      jobs.push(() => {
+        const seg = C.raw(u, 'segmento');
+        new Chart(document.getElementById(idH).getContext('2d'), { data: { labels: C.periodos, datasets: [
+          { type: 'bar', label: 'Segmento target', data: seg['Segmento target'], backgroundColor: C.cor('Segmento target'), stack: 'g', borderRadius: 3, datalabels: { display: false } },
+          { type: 'bar', label: 'Outros', data: seg['Outros'], backgroundColor: C.cor('Outros'), stack: 'g', borderRadius: 3, datalabels: { display: true, anchor: 'end', align: 'end', offset: 2, color: '#292A2B', font: { size: 12, weight: '700' }, formatter: (v, ctx) => C.fmtNum(tot[ctx.dataIndex], 0) } },
+          { type: 'line', label: 'Cresc. mercado (%)', data: C.cresc(tot), borderColor: C.cor('Cresc. mercado (%)'), backgroundColor: C.cor('Cresc. mercado (%)'), borderWidth: 3, tension: .3, yAxisID: 'y1', pointRadius: 3, datalabels: { display: true, align: 'top', color: '#00BFDF', font: { size: 12, weight: '700' }, formatter: v => v == null ? '' : C.fmtPct(v, 0) } } ] },
+          options: { responsive: true, maintainAspectRatio: false, animation: false, layout: { padding: { top: 18, right: 8, bottom: 8 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 18, font: { size: 13 } } }, tooltip: { enabled: false } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 13 } }, y: { stacked: true, display: false, beginAtZero: true }, y1: { display: false, position: 'right' } } } });
+        stack(document.getElementById(idMa), C.share(u, 'marcaTop'), ['Mounjaro', 'Wegovy', 'Poviztra', 'Ozempic', 'Outros'], true);
+        stack(document.getElementById(idMo), C.share(u, 'molecula'), Object.keys(C.raw(u, 'molecula')), true);
+        stack(document.getElementById(idCo), C.share(u, 'corporacao'), Object.keys(C.raw(u, 'corporacao')), true);
+      });
+    };
+
+    const opComposite = (u, marcasRaw, molRaw, titleName, label) => {
+      const unit = u === 'Unidades' ? 'Mil un' : 'R$ MM', L = C.periodos.length - 1;
+      const marcas = C.ordenar(marcasRaw), order = Object.keys(marcas);
+      const tot = C.periodos.map((_, i) => Object.values(marcas).reduce((a, s) => a + s[i], 0));
+      const mkt = C.total(u), shareMkt = tot.map((v, i) => mkt[i] ? Math.round(v / mkt[i] * 1000) / 10 : 0);
+      const g = C.cresc(tot)[L]; let lead = null; for (const [k, s] of Object.entries(marcas)) if (!lead || s[L] > lead.v) lead = { k, v: s[L] };
+      const s = document.createElement('section'); s.setAttribute('data-label', label + ' · ' + u); s.style.cssText = 'background:#fff;';
+      const idH = 'c' + (uid++), idMa = 'c' + (uid++), idMo = 'c' + (uid++);
+      const kpi = (lbl, val, sub) => `<div style="background:#EDF6FC;border:1px solid #EFEFEF;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:6px;"><div style="font-size:19px;color:#5D5F61;font-weight:600;">${lbl}</div><div style="font-size:${String(val).length > 8 ? 34 : 42}px;font-weight:700;color:#0062AA;line-height:1.15;">${val}</div><div style="font-size:17px;color:#5D5F61;">${sub}</div></div>`;
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px;"><div style="display:flex;align-items:center;gap:18px;min-width:0;"><div style="width:6px;height:42px;background:#00BFDF;border-radius:800px;flex:none;"></div><h2 style="font-size:44px;font-weight:700;color:#292A2B;margin:0;">One Page — ${titleName}</h2></div>${seloHtml(u)}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:20px;">
+          ${kpi('Sell-out (' + unit + ')', (u === 'Unidades' ? '' : 'R$ ') + C.fmtNum(tot[L], 0), '')}
+          ${kpi('Share no mercado', C.fmtNum(shareMkt[L], 1) + '%', '')}
+          ${kpi('Crescimento', g != null ? C.fmtPct(g) : '—', C.periodos.length > 12 ? 'vs. ano ant. (MAA)' : 'vs. mês ant. (MA)')}
+          ${kpi('Marca líder', lead ? lead.k : '—', 'sell-out')}
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:1.35fr 1fr;gap:22px;min-height:0;">
+          <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:24px;font-weight:700;color:#292A2B;margin-bottom:12px;">Sell-out por marca e share no mercado · ${unit}</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${idH}"></canvas></div></div>
+          <div style="display:grid;grid-template-rows:1fr 1fr;gap:16px;min-height:0;">
+            <div style="border:1px solid #EFEFEF;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:20px;font-weight:700;color:#292A2B;margin-bottom:6px;">Mix por marca (%)</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${idMo}"></canvas></div></div>
+            <div style="border:1px solid #EFEFEF;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:20px;font-weight:700;color:#292A2B;margin-bottom:6px;">Mix por molécula (%)</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${idMa}"></canvas></div></div>
+          </div>
+        </div>
+        <div style="font-size:16px;color:#5D5F61;margin-top:14px;">Líder: <b style="color:#0062AA;">${lead ? lead.k : '—'}</b> · share no mercado ${C.fmtNum(shareMkt[L], 1)}% · crescimento ${g != null ? C.fmtPct(g, 0) : '—'}.</div>
+      </div>`;
+      push(s);
+      jobs.push(() => {
+        const brandDs = order.map(k => ({ type: 'bar', label: k, data: marcas[k], backgroundColor: C.cor(k), stack: 'g', borderRadius: 2, datalabels: { display: false } }));
+        if (brandDs.length) brandDs[brandDs.length - 1].datalabels = { display: true, anchor: 'end', align: 'end', offset: 2, color: '#292A2B', font: { size: 12, weight: '700' }, formatter: (v, ctx) => C.fmtNum(tot[ctx.dataIndex], 0) };
+        brandDs.push({ type: 'line', label: 'Share no mercado (%)', data: shareMkt, borderColor: C.cor('Share no mercado (%)'), backgroundColor: C.cor('Share no mercado (%)'), borderWidth: 3, tension: .3, yAxisID: 'y1', pointRadius: 3, datalabels: { display: true, align: 'top', color: '#00BFDF', font: { size: 12, weight: '700' }, formatter: v => C.fmtNum(v, 1) + '%' } });
+        const _barMax = Math.max(...tot), _sMin = Math.min(...shareMkt), _sMax = Math.max(...shareMkt);
+        const _span = (_sMax - _sMin) || Math.max(_sMax, 1), _range = _span / 0.28, _y1min = _sMin - 0.66 * _range;
+        new Chart(document.getElementById(idH).getContext('2d'), { data: { labels: C.periodos, datasets: brandDs }, options: { responsive: true, maintainAspectRatio: false, animation: false, layout: { padding: { top: 18, right: 8, bottom: 8 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 18, font: { size: 12 } } }, tooltip: { enabled: false } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 13 } }, y: { stacked: true, display: false, max: _barMax / 0.58 }, y1: { display: false, position: 'right', min: _y1min, max: _y1min + _range } } } });
+        stack(document.getElementById(idMo), subShare(marcas), order, true);
+        const mol = C.ordenar(molRaw);
+        stack(document.getElementById(idMa), subShare(mol), Object.keys(mol), true);
+      });
+    };
+    const corpComposite = (u, corp) => opComposite(u, marcasCorp(u, corp), C.agrupar(u, 'molecula', { corporacao: corp }), 'Corporação · ' + corp, 'Corp ' + corp);
+    const canalComposite = (u, canal) => opComposite(u, C.agrupar(u, 'marca', { canal }), C.agrupar(u, 'molecula', { canal }), 'Canal · ' + canal, 'Canal ' + canal);
+
+    // ---- Montagem: fluxo igual ao HTML (One Page → Demanda → Preço) ----
+    let n = 1;
+    const UNITS = C.hasCPP ? ['PPP', 'Unidades', 'CPP'] : ['PPP', 'Unidades'];
+    const _uDesc = C.hasCPP ? 'em PPP (R$), CPP (R$) e Unidades.' : 'em PPP (R$) e Unidades.';
+    divider(String(n++).padStart(2, '0'), 'One Page — Visão de Mercado', 'Mercado total e mergulhos por corporação e por canal, ' + _uDesc);
+    UNITS.forEach(u => onePageComposite(u));
+    UNITS.forEach(u => Object.keys(C.raw(u, 'corporacao')).forEach(corp => corpComposite(u, corp)));
+    UNITS.forEach(u => Object.keys(C.raw(u, 'canal')).forEach(canal => canalComposite(u, canal)));
+
+    divider(String(n++).padStart(2, '0'), 'Demanda — Análise por Dimensão', 'Molécula, corporação, marca, crescimento, dinâmica por molécula, dosagem e canal.');
+    UNITS.forEach(u => {
+      dimPage(u, 'molecula', 'Molécula');
+      dimPage(u, 'corporacao', 'Corporação');
+      dimPage(u, 'marca', 'Marca');
+      scPage(u, 'molecula', 'Molécula');
+      scPage(u, 'marca', 'Marca');
+      scPage(u, 'corporacao', 'Corporação');
+      subPage(u, 'Semaglutida');
+      subPage(u, 'Liraglutida');
+      concPage(u, 'Semaglutida');
+      concPage(u, 'Tirzepatida');
+      ['Wegovy', 'Ozempic', 'Poviztra', 'Rybelsus'].forEach(p => concProdPage(u, p));
+      dimPage(u, 'canal', 'Canal');
+    });
+    canalMarcaPage();
+
+    divider(String(n++).padStart(2, '0'), 'Preço', 'Acompanhamento por dosagem e evolução semanal, com desconto vs. referência.');
+    C.B.PRECOS.pares.forEach(par => Object.keys(par.dosagens).forEach(dz => precoConc(par, dz)));
+
+    setTimeout(() => { jobs.forEach(fn => { try { fn(); } catch (e) {} }); stage.goTo && stage.goTo(0); }, 160);
+  }
+}
+</script>
+</body>
+</html>
+
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "Relatorio Emagrecimento";
+  // rAF raced with a short timeout: inside a cross-origin iframe (PrintMode),
+  // rAF can be throttled or paused even while the tab is focused, which would
+  // hang the scroll loop and never reach print(). Same pattern as
+  // buildExportSettleScript (export/shared.ts).
+  var raf = function () {
+    return Promise.race([
+      new Promise(function (r) { requestAnimationFrame(r); }),
+      new Promise(function (r) { setTimeout(r, 50); }),
+    ]);
+  };
+  var t0 = performance.now();
+  var mark = function (phase) {
+    var ms = Math.round(performance.now() - t0);
+    console.info('[autoprint]', phase, ms + 'ms');
+    try { parent.postMessage({ __omelette_autoprint: { phase: phase, ms: ms } }, '*'); } catch (e) {}
+  };
+  mark('start');
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    // A placeholder whose fetch failed (.sc-placeholder-error inside) keeps
+    // .sc-placeholder forever — don't wait on it. JS loop, not :has(), so an
+    // engine without :has() support can't throw out of the while and skip
+    // print() entirely.
+    var pendingPlaceholders = function () {
+      var all = settleRoot.querySelectorAll('.sc-placeholder'), n = 0;
+      for (var i = 0; i < all.length; i++)
+        if (!all[i].querySelector('.sc-placeholder-error')) n++;
+      return n;
+    };
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        pendingPlaceholders() === 0;
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  mark('settle-done' + (settleRoot ? ' (errs=' + settleRoot.querySelectorAll('.sc-placeholder-error').length + ' pending=' + pendingPlaceholders() + ')' : ''));
+  // Project support.js may predate runtime default-seeding; push via bridge.
+  if (isDc && window.__dcSetProps && window.__dcRootName) {
+    try {
+      const dpEl = document.querySelector('script[data-dc-script]');
+      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
+      const bag = {};
+      for (const k in meta)
+        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
+          bag[k] = meta[k].default;
+      if (Object.keys(bag).length) {
+        window.__dcSetProps(window.__dcRootName(), bag);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    } catch (e) {}
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    var scrollDeadline = Date.now() + 4000;
+    for (let y = 0; y <= full && Date.now() < scrollDeadline; y += step) {
+      window.scrollTo(0, y);
+      await raf();
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  mark('scroll-done');
+  try { await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 3000))]); } catch (e) {}
+  mark('fonts-done');
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await raf();
+    sweep();
+    await raf();
+  } catch (e) {}
+  // A document that owns its print CSS (the doc-page starter injects the
+  // meta at runtime; hand-rolled print designs author it) gets no automatic
+  // page geometry and keeps its forced breaks: strip the injected default
+  // @page — write time cannot see a runtime-injected meta — skip the frame
+  // override below, and skip the fakepage-flattening further down. What
+  // still applies: the print baseline and break-hygiene defaults (no @page
+  // in either; low specificity, so the document's own print CSS wins) and
+  // the break-inside relaxation on >page elements (avoid on those cannot
+  // be honored whoever authored it).
+  var ownsPrint = !!document.querySelector('meta[name="omelette-owns-print" i]');
+  if (ownsPrint) {
+    var dst = document.querySelector('style[data-omelette-print-defaults]');
+    if (dst && dst.textContent) {
+      dst.textContent = dst.textContent.replace(/@page\b[^{}]*\{[^}]*\}/, '');
+    }
+  }
+  // Size the PDF page to the rendered design unless the file opted into
+  // standard paper via @page{size:letter|A4|…} or declared print ownership
+  // via the meta above. Decks own their own @page.
+  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
+  // frame itself loses only margin — its padding is INSIDE the measured
+  // rect and must stay, or content shifts and leaves a gap at bottom/right.
+  var __m = null;
+  try { __m = (() => {
+  var STAMP = true;
+  var docEl = document.documentElement;
+  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
+  // Name-presence check, case-insensitive — the same contract as the
+  // instant-PDF path's runtime check in deck-stage-export.ts. The name is
+  // a string literal here because that file interpolates this script into
+  // its print script, so importing a shared constant from it would be a
+  // cycle; measure.test.ts pins the literal so the two cannot drift apart
+  // silently.
+  var ownsPrint = !!document.querySelector('meta[name="omelette-owns-print" i]');
+
+  var ds = document.querySelector('deck-stage');
+  if (ds) {
+    var dw = Number(ds.getAttribute('width')) || 1920;
+    var dh = Number(ds.getAttribute('height')) || 1080;
+    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
+    var idx = typeof ds.index === 'number' ? ds.index : 0;
+    var frames = [];
+    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
+    return { kind: 'deck', source: 'declared', doc: doc, frames: frames,
+      authored: frames.map(function(){return{width:true,height:true}}),
+      deck: { width: dw, height: dh, slideCount: n, index: idx },
+      signals: { paperPage: false, pxPage: false, ownsPrint: ownsPrint } };
+  }
+
+  // Declared kind: a doc-page tag names the kind outright, so no signal
+  // heuristics run (like the deck branch above, signals report false —
+  // they describe inferred classifications only). The tag alone is not
+  // trusted: the element must have upgraded (shadowRoot present), so a
+  // leftover tag whose script was deleted falls through to the heuristics
+  // that handle plain markup.
+  var stageSx = window.scrollX || 0, stageSy = window.scrollY || 0;
+  var dp = document.querySelector('doc-page');
+  if (dp && dp.shadowRoot) {
+    // Crop to the sheet, not the host — the desk around it is screen-only
+    // chrome that must not land in PNG exports.
+    var sheet = dp.shadowRoot.querySelector('.sheet');
+    var sr = (sheet || dp).getBoundingClientRect();
+    return { kind: 'paper-doc', source: 'declared', doc: doc,
+      frames: [{ left: sr.left + stageSx, top: sr.top + stageSy,
+        width: sr.width, height: sr.height }],
+      authored: [{ width: false, height: false }],
+      signals: { paperPage: false, pxPage: false, ownsPrint: ownsPrint } };
+  }
+  var paperPage = false, pxPage = false;
+  var eachRule = function (fn) {
+    for (var s = 0; s < document.styleSheets.length; s++) {
+      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
+      for (var r = 0; r < rs.length; r++) {
+        fn(rs[r]);
+        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
+      }
+    }
+  };
+  eachRule(function (r) {
+    if (r.type !== 6) return;
+    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
+    if (!m) return;
+    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
+    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
+  });
+  var signals = { paperPage: paperPage, pxPage: pxPage, ownsPrint: ownsPrint };
+
+  var pxVal = function (v) {
+    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
+  };
+  var authoredPx = function (el, prop) {
+    if (pxVal(el.style[prop])) return true;
+    var attr = el.getAttribute(prop);
+    if (attr && /^\d+$/.test(attr)) return true;
+    var hit = false;
+    eachRule(function (r) {
+      if (hit || r.type !== 1 || !r.style) return;
+      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
+    });
+    return hit;
+  };
+
+  var el = document.body, rootPxW = false;
+  for (;;) {
+    var kids = [];
+    for (var c = 0; c < el.children.length; c++) {
+      var t = el.children[c].tagName;
+      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
+    }
+    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
+    if (STAMP) el.setAttribute('data-om-frame-wrap', '');
+    el = kids[0];
+    rootPxW = authoredPx(el, 'width');
+    if (rootPxW) break;
+  }
+  if (!rootPxW) rootPxW = authoredPx(el, 'width');
+
+  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
+  // fixed sheet pretending to be paper — fall through and size to render.
+  if (paperPage && !rootPxW) {
+    return { kind: 'paper-doc', source: 'inferred', doc: doc, signals: signals,
+      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
+      authored: [{ width: false, height: false }] };
+  }
+
+  var sx = window.scrollX || 0, sy = window.scrollY || 0;
+  var rectOf = function (e) {
+    var r = e.getBoundingClientRect();
+    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
+    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
+    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
+  };
+
+  // Multi-frame: off unless the page opts in via data-om-multi-frame on the
+  // stop element — the explicit opt-in is what guards against card grids
+  // and pricing tables that match the geometry but aren't separate
+  // canvases. Two ways to name the frames, explicit first:
+  // 1. Descendants marked data-om-frame-export (the social-frames starter
+  //    marks each asset frame; shells/panels around them are presentation,
+  //    so nesting is expected). Document order.
+  // 2. Fallback, no marked descendants: direct children with an authored px
+  //    width AND height (the original geometry heuristic).
+  // Frames may be different sizes (a gallery mixes 1080×1920 stories with
+  // 728×90 banners); data-om-frame-label rides along for export filenames.
+  if (el.hasAttribute('data-om-multi-frame')) {
+    var visOk = function (e) {
+      var cs; try { cs = getComputedStyle(e); } catch (err) { return false; }
+      return cs.display !== 'none' && cs.visibility !== 'hidden' && cs.position !== 'fixed';
+    };
+    // A frame's crop is its VISUAL box — never the scrollHeight-inflated
+    // rect that rectOf computes for page roots. Shadow-DOM hover controls
+    // (image-slot's Replace bar parks 29px below its host) and similar
+    // escaping UI contribute scrollable overflow to the frame, and the
+    // inflated height both squashes the nominal-size resize and drags
+    // content below the frame into the crop. Zoom-independent; bit every
+    // slot-bearing frame.
+    var frameRectOf = function (e) {
+      var r = e.getBoundingClientRect();
+      return { left: r.left + sx, top: r.top + sy, width: r.width, height: r.height };
+    };
+    var pushCand = function (list, e) {
+      if (!visOk(e)) return;
+      var rc = frameRectOf(e);
+      if (rc.width < 2 || rc.height < 2) return;
+      var lbl = e.getAttribute('data-om-frame-label');
+      if (lbl) rc.label = lbl;
+      list.push(rc);
+    };
+    var cands = [];
+    var marked = el.querySelectorAll('[data-om-frame-export]');
+    if (marked.length) {
+      for (var mk = 0; mk < marked.length; mk++) pushCand(cands, marked[mk]);
+    } else {
+      for (var k = 0; k < el.children.length; k++) {
+        var ch = el.children[k];
+        if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
+        pushCand(cands, ch);
+      }
+    }
+    if (cands.length >= 2) {
+      return { kind: 'multi-frame', source: 'inferred', doc: doc, signals: signals,
+        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
+    }
+  }
+
+  if (STAMP) el.setAttribute('data-om-frame', '');
+  return { kind: 'single-canvas', source: 'inferred', doc: doc, signals: signals,
+    frames: [rectOf(el)],
+    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
+})(); } catch (e) {}
+  var frame = null;
+  if (!ownsPrint && __m && __m.kind === 'single-canvas') {
+    var f = __m.frames && __m.frames[0];
+    if (f && f.width >= 200 && f.height >= 200) {
+      frame = f;
+      var fst = document.createElement('style');
+      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
+        Math.ceil(f.height) + 'px;margin:0}' +
+        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
+        '[data-om-frame]{margin:0!important}}';
+      document.body.appendChild(fst);
+    }
+  }
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks (slides
+  // are sized to the page) and for fixed-size canvases (frame set, or an author
+  // px-based @page) — runs as before for flowing docs on letter/A4.
+  try {
+    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a real @page margin only when the source has
+      // no @page of its own; computed style can't tell us (it reports screen
+      // media), so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          // An owns-print doc's forced breaks are intentional sheet
+          // boundaries, never fake-paged simulation — don't strip them.
+          // The break-inside relaxation above still applies: avoid on a
+          // >page element is impossible to honor whoever authored it.
+          if (
+            !ownsPrint &&
+            (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always')
+          ) {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  mark('print-calling');
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
