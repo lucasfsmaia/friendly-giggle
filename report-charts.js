@@ -22,7 +22,7 @@
       interaction: { mode: 'index', intersect: false },
       layout: { padding: { top: rot ? 18 : 4, right: rot ? 10 : 2, bottom: compact ? 6 : 10 } },
       plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: compact ? 16 : 22, font: { size: compact ? 12 : 14 } } },
+        legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } },
         tooltip: ctx.tooltip === false ? { enabled: false } : {
           callbacks: {
             label: (x) => {
@@ -59,17 +59,46 @@
     const C = window.CALC;
     const { dataObj, order, percent } = o;
     const barR = o.barR || 0, rot = !!ctx.rotulos;
-    const ds = order.filter(k => dataObj[k]).map(k => {
+    const noLbl = o.noLabelKeys || [];
+    const keys = order.filter(k => dataObj[k]);
+    const lastIdx = keys.length - 1;
+    const ds = keys.map((k, idx) => {
       const col = C.cor(k);
-      return {
-        label: k, data: dataObj[k], backgroundColor: col, stack: 's', borderWidth: 0, borderRadius: barR,
-        datalabels: rot
-          ? { display: (c) => c.dataset.data[c.dataIndex] >= (percent ? 6 : 0.01), color: light(col) ? '#074878' : '#fff', font: { size: 11, weight: '700' }, formatter: (v) => percent ? C.fmtNum(v, 0) + '%' : C.fmtNum(v, 0) }
-          : { display: false }
-      };
+      const seg = (rot && noLbl.indexOf(k) < 0)
+        ? { display: (c) => { const n = c.chart.data.labels.length; return (c.dataIndex === 0 || c.dataIndex === n - 1) && c.dataset.data[c.dataIndex] >= (percent ? 6 : 0.01); }, color: light(col) ? '#074878' : '#fff', font: { size: 12, weight: '700' }, formatter: (v) => percent ? C.fmtNum(v, 0) + '%' : C.fmtNum(v, 0) }
+        : { display: false };
+      let datalabels = seg;
+      if (idx === lastIdx && o.totalLabel && o.totals) {
+        datalabels = { labels: { value: seg, total: { display: (c) => { const n = c.chart.data.labels.length; return c.dataIndex === 0 || c.dataIndex === n - 1; }, anchor: 'end', align: 'end', offset: 4, color: '#292A2B', font: { size: 12, weight: '700' }, formatter: (v, c) => C.fmtNum(o.totals[c.dataIndex], 0) } } };
+      }
+      return { label: k, data: dataObj[k], backgroundColor: col, stack: 's', borderWidth: 0, borderRadius: barR, datalabels };
     });
     return { type: 'bar', data: { labels: ctx.periodos, datasets: ds }, options: baseOpts({ stacked: true, percent, compact: true, unit: ctx.unit }, ctx) };
   }
 
-  window.HYReport = { baseOpts, stackConfig, light };
+  function comboConfig(o, ctx) {
+    o = o || {}; ctx = ctx || {};
+    const C = window.CALC; const rot = !!ctx.rotulos;
+    const totals = o.totals || [], order = o.order || [];
+    const brandDs = order.map((k, i) => {
+      const d = { type: 'bar', label: k, data: o.barsObj[k], backgroundColor: C.cor(k), stack: 'g', borderRadius: o.barR || 0, order: 3, datalabels: { display: false } };
+      if (rot && o.segLabel && i === 0) d.datalabels = { display: (c) => c.dataset.data[c.dataIndex] > 0, anchor: 'center', align: 'center', color: '#fff', font: { size: 12, weight: '700' }, formatter: (v) => C.fmtNum(v, 0) };
+      return d;
+    });
+    if (brandDs.length) brandDs[brandDs.length - 1].datalabels = (rot || o.alwaysTotal)
+      ? { display: (c) => { const n = c.chart.data.labels.length; return c.dataIndex === 0 || c.dataIndex === n - 1; }, anchor: 'end', align: 'end', offset: 2, color: '#292A2B', font: { size: 12, weight: '700' }, formatter: (v, c) => C.fmtNum(totals[c.dataIndex], 0) }
+      : { display: false };
+    const datasets = [...brandDs];
+    const optsIn = { stacked: true, unit: o.unit };
+    if (o.lineData != null) {
+      const lineKey = o.lineColorKey || 'Share no mercado (%)';
+      const lineFmt = o.lineFmt || ((v) => C.fmtNum(v, 1) + '%');
+      datasets.push({ type: 'line', label: o.lineLabel, data: o.lineData, borderColor: C.cor(lineKey), backgroundColor: C.cor(lineKey), borderWidth: 3, tension: .3, yAxisID: 'y1', pointRadius: o.linePointRadius == null ? 3 : o.linePointRadius, order: 1, datalabels: rot ? { display: true, align: 'top', color: C.cor('Cresc. mercado (%)'), font: { size: 12, weight: '700' }, formatter: (v) => v == null ? '' : lineFmt(v) } : { display: false } });
+      optsIn.dualAxis = true;
+      if (o.band !== false) { optsIn.barMax = Math.max.apply(null, totals); optsIn.shareMin = Math.min.apply(null, o.lineData); optsIn.shareMax = Math.max.apply(null, o.lineData); }
+    }
+    return { data: { labels: ctx.periodos, datasets }, options: baseOpts(optsIn, ctx) };
+  }
+
+  window.HYReport = { baseOpts, stackConfig, comboConfig, light };
 })();

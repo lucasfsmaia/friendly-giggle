@@ -96,7 +96,7 @@
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:20px;">
+      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin-bottom:20px;">
         <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
           <div id="kpiTotalLbl" style="font-size:19px; color:var(--hy-muted); font-weight:600;">Mercado total</div>
           <div id="kpiTotal" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
@@ -116,6 +116,11 @@
           <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Segmento target</div>
           <div id="kpiTarget" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
           <div style="font-size:18px; color:var(--hy-muted);">Semaglutida ≤ 1mg</div>
+        </div>
+        <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:22px 24px; display:flex; flex-direction:column; gap:6px;">
+          <div style="font-size:19px; color:var(--hy-muted); font-weight:600;">Cresc. segmento target</div>
+          <div id="kpiTgtCresc" style="font-size:46px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div>
+          <div style="font-size:18px; color:var(--hy-muted);">vs. ano ant. (MAA)</div>
         </div>
       </div>
 
@@ -194,7 +199,6 @@
           </div>
         </div>
       </div>
-      <div id="coCap" style="font-size:20px; color:var(--hy-body); margin-top:14px;"></div>
     </div>
   </section>
 
@@ -251,7 +255,7 @@
           </div>
         </div>
       </div>
-      <div id="caCap" style="font-size:20px; color:var(--hy-body); margin-top:14px;"></div>
+      <div id="caCap" style="display:none;"></div>
     </div>
   </section>
 
@@ -438,18 +442,13 @@ class Component extends DCLogic {
     }
     this.$('#caHeroTitle').textContent = 'Sell-out por marca — canal ' + this.canalSel + (molSel !== 'Total' ? ' · ' + molSel : '') + ' · ' + unit;
 
-    const brandDs = heroOrder.map(k => ({ type: 'bar', label: k, data: heroMarcas[k], backgroundColor: C.cor(k), stack: 'g', borderRadius: this.barR, order: 3, datalabels: { display: false } }));
-    if (brandDs.length) brandDs[brandDs.length - 1].datalabels = rot
-      ? { display: true, anchor: 'end', align: 'end', offset: 2, color: '#292A2B', font: { size: 12, weight: '700' }, formatter: (v, ctx) => C.fmtNum(heroTot[ctx.dataIndex], 0) }
-      : { display: false };
-    const lineDs = { type: 'line', label: 'Share no mercado (%)', data: heroShare, borderColor: C.cor('Share no mercado (%)'), backgroundColor: C.cor('Share no mercado (%)'), borderWidth: 3, tension: .3, yAxisID: 'y1', pointRadius: 3, order: 1, datalabels: rot ? { display: true, align: 'top', color: C.cor('Cresc. mercado (%)'), font: { size: 12, weight: '700' }, formatter: (v) => C.fmtNum(v, 1) + '%' } : { display: false } };
-    this._mk('chCanHero', { data: { labels: C.periodos, datasets: [...brandDs, lineDs] }, options: this._baseOpts({ stacked: true, dualAxis: true, unit, barMax: Math.max(...heroTot), shareMin: Math.min(...heroShare), shareMax: Math.max(...heroShare) }) });
+    const gCanM = this._groupLira(heroMarcas), gCanO = Object.keys(gCanM);
+    this._mk('chCanHero', window.HYReport.comboConfig({ barsObj: gCanM, order: gCanO, totals: heroTot, lineLabel: 'Share no mercado (%)', lineData: heroShare, unit, barR: this.barR, alwaysTotal: true }, { periodos: C.periodos, rotulos: this.rotulos, eixoY: this.eixoY }));
 
     { const t = this.$('#tCanMarca'); if (t) t.textContent = 'Mix por marca (%)' + (molSel !== 'Total' ? ' · ' + molSel : ''); }
     this._stack('chCanMarca', this._subShare(heroMarcas), heroOrder, true);
     const mol = C.ordenar(C.agrupar(u, 'molecula', { canal: this.canalSel }));
     this._stack('chCanMol', this._subShare(mol), Object.keys(mol), true);
-    this._cap('caCap', marcas);
   }
 
   _renderExec() {
@@ -526,17 +525,12 @@ class Component extends DCLogic {
     this.$('#coKpiLider').textContent = lead ? lead.k : '—';
     this.$('#coHeroTitle').textContent = 'Sell-out por marca e share no mercado · ' + unit;
 
-    const brandDs = order.map(k => ({ type: 'bar', label: k, data: marcas[k], backgroundColor: C.cor(k), stack: 'g', borderRadius: this.barR, order: 3, datalabels: { display: false } }));
-    if (brandDs.length) brandDs[brandDs.length - 1].datalabels = rot
-      ? { display: true, anchor: 'end', align: 'end', offset: 2, color: '#292A2B', font: { size: 12, weight: '700' }, formatter: (v, ctx) => C.fmtNum(corpTot[ctx.dataIndex], 0) }
-      : { display: false };
-    const lineDs = { type: 'line', label: 'Share no mercado (%)', data: shareMkt, borderColor: C.cor('Share no mercado (%)'), backgroundColor: C.cor('Share no mercado (%)'), borderWidth: 3, tension: .3, yAxisID: 'y1', pointRadius: 3, order: 1, datalabels: rot ? { display: true, align: 'top', color: C.cor('Cresc. mercado (%)'), font: { size: 12, weight: '700' }, formatter: (v) => C.fmtNum(v, 1) + '%' } : { display: false } };
-    this._mk('chCorpHero', { data: { labels: C.periodos, datasets: [...brandDs, lineDs] }, options: this._baseOpts({ stacked: true, dualAxis: true, unit, barMax: Math.max(...corpTot), shareMin: Math.min(...shareMkt), shareMax: Math.max(...shareMkt) }) });
+    const gCoM = this._groupLira(marcas), gCoO = Object.keys(gCoM);
+    this._mk('chCorpHero', window.HYReport.comboConfig({ barsObj: gCoM, order: gCoO, totals: corpTot, lineLabel: 'Share no mercado (%)', lineData: shareMkt, unit, barR: this.barR, alwaysTotal: true }, { periodos: C.periodos, rotulos: this.rotulos, eixoY: this.eixoY }));
 
     this._stack('chCorpMarca', this._subShare(marcas), order, true);
     const mol = this._molDaCorp(u, this.corp);
     this._stack('chCorpMol', this._subShare(mol), Object.keys(mol), true);
-    this._cap('coCap', marcas);
   }
 
   // corte de marcas de uma molécula
@@ -562,9 +556,19 @@ class Component extends DCLogic {
     return o;
   }
 
-  _stack(id, dataObj, order, percent) {
-    const C = window.CALC;
-    this._mk(id, window.HYReport.stackConfig({ dataObj, order, percent, barR: this.barR }, { periodos: C.periodos, unit: this.unidade === 'Unidades' ? 'Mil un' : 'R$ MM', rotulos: this.rotulos, eixoY: this.eixoY }));
+  _stack(id, dataObj, order, percent, extra) {
+    const C = window.CALC; extra = extra || {};
+    this._mk(id, window.HYReport.stackConfig({ dataObj, order, percent, barR: this.barR, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys }, { periodos: C.periodos, unit: this.unidade === 'Unidades' ? 'Mil un' : 'R$ MM', rotulos: this.rotulos, eixoY: this.eixoY }));
+  }
+
+  _groupLira(obj) {
+    const C = window.CALC, per = C.periodos, lira = per.map(() => 0); let has = false; const out = {};
+    Object.keys(obj).forEach(m => {
+      const isL = (C.mapa[m] && C.mapa[m].molecula === 'Liraglutida') || m === 'Saxenda/Victoza' || m === 'Olire/Lirux';
+      if (isL) { obj[m].forEach((v, i) => (lira[i] += v)); has = true; } else out[m] = obj[m];
+    });
+    if (has) out['Liraglutida'] = lira;
+    return out;
   }
 
   _cap(id, dataObj) {
@@ -593,7 +597,7 @@ class Component extends DCLogic {
     const raw = C.ordenar(C.agrupar(u, dim, filtro)), order = Object.keys(raw);
     const single = this.$('#panSingle'), dual = this.$('#panDual');
     single.style.display = 'none'; dual.style.display = 'grid';
-    const growBars = (id, fn) => { const gc = order.map(k => ({ k, v: fn(k) })).filter(o => o.v != null); this._mk(id, { type: 'bar', data: { labels: gc.map(o => o.k), datasets: [{ data: gc.map(o => o.v), backgroundColor: gc.map(o => C.cor(o.k)), borderRadius: this.barR, datalabels: { display: true, anchor: 'end', align: 'end', color: '#292A2B', font: { size: 12, weight: '700' }, formatter: v => C.fmtPct(v, 0) } }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 46 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: x => C.fmtPct(x.parsed.x) } } }, scales: { x: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 12 } } } } } }); };
+    const growBars = (id, fn) => { const gc = order.map(k => ({ k, v: fn(k) })).filter(o => o.v != null).sort((a, b) => b.v - a.v); this._mk(id, { type: 'bar', data: { labels: gc.map(o => o.k), datasets: [{ data: gc.map(o => o.v), backgroundColor: gc.map(o => o.v >= 0 ? '#6FA98C' : '#CB8C8C'), borderRadius: this.barR, datalabels: { display: true, anchor: 'end', align: (c) => c.dataset.data[c.dataIndex] >= 0 ? 'end' : 'start', color: '#292A2B', font: { size: 12, weight: '700' }, formatter: v => C.fmtPct(v, 0) } }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 46, left: 46 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: x => C.fmtPct(x.parsed.x) } } }, scales: { x: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 12 } } } } } }); };
     if (this.panMetric === 'cresc') {
       this.$('#panT1').textContent = 'Crescimento vs. mês anterior (%)';
       this.$('#panT2').textContent = 'Crescimento vs. ano anterior — YoY (%)';
@@ -602,10 +606,13 @@ class Component extends DCLogic {
     } else {
       this.$('#panT1').textContent = 'Sell-out';
       this.$('#panT2').textContent = 'Market share (%)';
-      this._stack('chPanShare', raw, order, false);
-      this._stack('chPanGrow', this._subShare(raw), order, true);
+      const gRaw = dim === 'marca' ? this._groupLira(raw) : raw;
+      const gOrder = Object.keys(gRaw);
+      const totAbs = C.periodos.map((_, i) => gOrder.reduce((a, k) => a + gRaw[k][i], 0));
+      this._stack('chPanShare', gRaw, gOrder, false, { totals: totAbs, totalLabel: true, noLabelKeys: ['Liraglutida'] });
+      this._stack('chPanGrow', this._subShare(gRaw), gOrder, true, { noLabelKeys: ['Liraglutida'] });
     }
-    this._cap('capPan', raw);
+    const _cp = this.$('#capPan'); if (_cp) _cp.style.display = 'none';
   }
 
   _renderMolDetalhe() {
@@ -666,7 +673,7 @@ class Component extends DCLogic {
     const ds = order.map(k => ({ label: k, data: C.crescMA(raw[k]), borderColor: C.cor(k), backgroundColor: C.cor(k), borderWidth: 2.5, tension: .3, pointRadius: 2, spanGaps: true, datalabels: { display: false } }));
     this._mk('chScCresc', {
       type: 'line', data: { labels: C.periodos, datasets: ds },
-      options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, font: { size: 12 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtPct(x.parsed.y) } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 13 } }, y: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } } } }
+      options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtPct(x.parsed.y) } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 13 } }, y: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } } } }
     });
     this._cap('capSc', raw);
   }
@@ -681,7 +688,7 @@ class Component extends DCLogic {
       type: 'bar', data: { labels: brands, datasets: [
         { label: 'Direto', data: dir, backgroundColor: C.cor('Direto'), stack: 's', datalabels: dl('#fff') },
         { label: 'Indireto', data: ind, backgroundColor: C.cor('Indireto'), stack: 's', datalabels: dl('#074878') } ] },
-      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 14 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtNum(x.parsed.y, 0) + '%' } } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 13 } } }, y: { stacked: true, display: false, max: 100 } } }
+      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtNum(x.parsed.y, 0) + '%' } } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 13 } } }, y: { stacked: true, display: false, max: 100 } } }
     });
   }
 
@@ -908,28 +915,13 @@ class Component extends DCLogic {
     this.$('#kpiCrescLbl').textContent = per.length > 12 ? 'vs. mesmo mês ano ant. (MAA)' : 'vs. mês anterior (MA)';
     this.$('#kpiLider').textContent = C.fmtNum(C.ultimo(molShare['Tirzepatida']), 1) + '%';
     this.$('#kpiTarget').textContent = C.fmtNum(C.ultimo(segShare['Segmento target']), 1) + '%';
+    this.$('#kpiTgtCresc').textContent = C.fmtPct(C.ultimo(C.crescMAA(C.raw(u, 'segmento')['Segmento target'])));
     this.$('#heroTitle').textContent = 'Mercado total vs. segmento target · ' + unit;
 
     // HERO
     const seg = C.raw(u, 'segmento');
     const rot = this.rotulos;
-    this._mk('chHero', {
-      data: {
-        labels: per,
-        datasets: [
-          { type: 'bar', label: 'Segmento target', data: seg['Segmento target'], backgroundColor: C.cor('Segmento target'), stack: 'g', borderRadius: this.barR, order: 3, datalabels: rot ? { display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0, anchor: 'center', align: 'center', color: '#fff', font: { size: 12, weight: '700' }, formatter: (v) => C.fmtNum(v, 0) } : { display: false } },
-          {
-            type: 'bar', label: 'Outros', data: seg['Outros'], backgroundColor: C.cor('Outros'), stack: 'g', borderRadius: this.barR, order: 3,
-            datalabels: rot ? { display: true, anchor: 'end', align: 'end', offset: 2, color: '#292A2B', font: { size: 12, weight: '700' }, formatter: (v, ctx) => C.fmtNum(tot[ctx.dataIndex], u === 'PPP' ? 0 : 0) } : { display: false }
-          },
-          {
-            type: 'line', label: 'Cresc. mercado (%)', data: C.cresc(tot), borderColor: C.cor('Cresc. mercado (%)'), backgroundColor: C.cor('Cresc. mercado (%)'), borderWidth: 3, tension: .3, yAxisID: 'y1', pointRadius: 0, order: 1,
-            datalabels: rot ? { display: true, align: 'top', color: C.cor('Cresc. mercado (%)'), font: { size: 12, weight: '700' }, formatter: (v) => v == null ? '' : C.fmtPct(v, 0) } : { display: false }
-          },
-        ]
-      },
-      options: this._baseOpts({ stacked: true, dualAxis: true, unit })
-    });
+    this._mk('chHero', window.HYReport.comboConfig({ barsObj: seg, order: ['Segmento target', 'Outros'], totals: tot, segLabel: true, unit, barR: this.barR }, { periodos: per, rotulos: this.rotulos, eixoY: this.eixoY }));
 
     this._shareChart('chMarca', C.share(u, 'marcaTop'), ['Mounjaro', 'Wegovy', 'Poviztra', 'Ozempic', 'Outros']);
     this._shareChart('chMol', C.share(u, 'molecula'), Object.keys(C.raw(u, 'molecula')));
@@ -943,7 +935,7 @@ class Component extends DCLogic {
       return {
         label: k, data: shareObj[k], backgroundColor: col, stack: 's', borderWidth: 0,
         datalabels: rot
-          ? { display: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 6, color: this._light(col) ? '#074878' : '#fff', font: { size: 11, weight: '700' }, formatter: (v) => C.fmtNum(v, 0) + '%' }
+          ? { display: (ctx) => (ctx.dataIndex === 0 || ctx.dataIndex === last) && ctx.dataset.data[ctx.dataIndex] >= 6, color: this._light(col) ? '#074878' : '#fff', font: { size: 12, weight: '700' }, formatter: (v) => C.fmtNum(v, 0) + '%' }
           : { display: false }
       };
     });
@@ -979,7 +971,7 @@ class Component extends DCLogic {
     this._mk('chPreco', { type: 'line', data: { labels: P.semanas, datasets: [
       { label: par.referencia + ' (ref.)', data: d.evRef, borderColor: C.cor('Preço ref.'), backgroundColor: C.cor('Preço ref.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: dl('top', '#074878') },
       { label: par.concorrente, data: d.evConc, borderColor: C.cor('Preço conc.'), backgroundColor: C.cor('Preço conc.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: dl('bottom', '#0062AA') } ] },
-      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, layout: { padding: { top: 20, bottom: 8 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 14, padding: 14, font: { size: 15 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtR$(x.parsed.y, 0) } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 14 } } }, y: { display: this.eixoY, grid: { display: this.eixoY, color: '#EFEFEF' }, ticks: { font: { size: 13 }, callback: v => C.fmtR$(v, 0) }, beginAtZero: false } } } });
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, layout: { padding: { top: 20, bottom: 8 } }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } }, tooltip: { callbacks: { label: x => x.dataset.label + ': ' + C.fmtR$(x.parsed.y, 0) } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 14 } } }, y: { display: this.eixoY, grid: { display: this.eixoY, color: '#EFEFEF' }, ticks: { font: { size: 13 }, callback: v => C.fmtR$(v, 0) }, beginAtZero: false } } } });
   }
 }
 </script>
