@@ -1,0 +1,50 @@
+name: Build e Deploy no GitHub Pages
+
+# Publica o site a cada push na main. O "build" gera as páginas publicadas
+# (index.html, relatorio-print.html, atualizador.html) a partir dos
+# arquivos-fonte .dc.html — que já abrem direto no navegador — e faz o deploy
+# da raiz do repositório no GitHub Pages. Não há empacotamento/inlining: os
+# Design Components são servidos com suas dependências (support.js, calc.js,
+# report-charts.js, deck-stage.js, _ds/, assets/, base-emagrecimento.js).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Gerar páginas publicadas a partir das fontes (.dc.html)
+        run: |
+          cp "Relatorio Emagrecimento.dc.html" index.html
+          cp "Relatorio Emagrecimento-print.dc.html" relatorio-print.html
+          cp "Atualizador da Base.dc.html" atualizador.html
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Empacotar a raiz do repositório
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Publicar no Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
