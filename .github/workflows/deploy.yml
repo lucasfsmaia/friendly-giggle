@@ -1,11 +1,10 @@
 name: Build e Deploy no GitHub Pages
 
-# Publica o site a cada push na main. O "build" gera as páginas publicadas
-# (index.html, relatorio-print.html, atualizador.html) a partir dos
-# arquivos-fonte .dc.html — que já abrem direto no navegador — e faz o deploy
-# da raiz do repositório no GitHub Pages. Não há empacotamento/inlining: os
-# Design Components são servidos com suas dependências (support.js, calc.js,
-# report-charts.js, deck-stage.js, _ds/, assets/, base-emagrecimento.js).
+# Publica o site a cada push na main. NÃO gera nem copia nada: publica os
+# arquivos JÁ EMPACOTADOS que estão na raiz do repositório — index.html (deck),
+# relatorio-print.html (PDF) e atualizador.html —, apenas validando que existem.
+# Isso torna o index.html determinístico (sempre o bundle do deck), sem risco
+# de a etapa de build sobrescrevê-lo com o arquivo errado.
 
 on:
   push:
@@ -31,24 +30,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Gerar páginas publicadas a partir das fontes (.dc.html)
+      - name: Validar bundles publicados (não gera nada)
         run: |
           set -euo pipefail
-          # Falha o build (sem publicar) se qualquer fonte ou dependência faltar
-          req=(
-            "Relatorio Emagrecimento.dc.html"
-            "Relatorio Emagrecimento-print.dc.html"
-            "Atualizador da Base.dc.html"
-            "support.js" "calc.js" "report-charts.js" "deck-stage.js"
-            "base-emagrecimento.js" ".nojekyll"
-          )
+          req=("index.html" "relatorio-print.html" "atualizador.html" "base-emagrecimento.js" ".nojekyll")
           for f in "${req[@]}"; do
-            [ -f "$f" ] || { echo "::error::Arquivo obrigatório ausente: $f"; exit 1; }
+            [ -f "$f" ] || { echo "::error::Arquivo obrigatório ausente na raiz: $f"; exit 1; }
           done
-          cp "Relatorio Emagrecimento.dc.html" index.html
-          cp "Relatorio Emagrecimento-print.dc.html" relatorio-print.html
-          cp "Atualizador da Base.dc.html" atualizador.html
-          echo "Build OK: index.html, relatorio-print.html, atualizador.html"
+          echo "OK: publicando bundles prontos (index.html = deck)."
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5
@@ -61,4 +50,3 @@ jobs:
       - name: Publicar no Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
