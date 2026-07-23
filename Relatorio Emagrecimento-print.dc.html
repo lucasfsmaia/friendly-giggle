@@ -57,6 +57,7 @@ class Component extends DCLogic {
   _build() {
     const C = window.CALC, stage = document.querySelector('deck-stage');
     if (window.ChartDataLabels) Chart.register(window.ChartDataLabels);
+    Chart.defaults.set('plugins.datalabels', { anchor: 'center', align: 'center', clamp: true });
     Chart.defaults.font.family = "'Asap', sans-serif";
     Chart.defaults.color = '#5D5F61';
     Chart.defaults.animation = false;

@@ -768,7 +768,9 @@ class Component extends DCLogic {
       borderColor: 'rgba(0,191,223,.55)', borderWidth: 1
     });
     if (window.ChartDataLabels) Chart.register(window.ChartDataLabels);
-    Chart.defaults.set('plugins.datalabels', { display: false });
+    // Default global: rótulos centrados no elemento e presos à área do gráfico —
+    // solução permanente p/ descentralização (labels de total/linha sobrescrevem anchor/align).
+    Chart.defaults.set('plugins.datalabels', { display: false, anchor: 'center', align: 'center', clamp: true });
 
     this.unidade = 'PPP';
     this.rotulos = this.props.mostrarRotulos ?? true;
