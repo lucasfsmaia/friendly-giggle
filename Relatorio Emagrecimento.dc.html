@@ -315,7 +315,6 @@
           <div style="flex:1; position:relative; min-height:0;"><canvas id="chShrConc"></canvas></div>
         </div>
       </div>
-      <div id="capConc" style="font-size:20px; color:var(--hy-body); margin-top:14px;"></div>
     </div>
   </section>
 
@@ -335,7 +334,6 @@
         <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Representatividade (%)</div><div style="flex:1; position:relative; min-height:0;"><canvas id="chCanShr"></canvas></div></div>
       </div>
       <div id="canMarcaWrap" style="flex:1; border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; position:relative; min-height:0; display:none;"><canvas id="chCanalMarca"></canvas></div>
-      <div id="capCanal" style="font-size:20px; color:var(--hy-body); margin-top:14px;"></div>
     </div>
   </section>
 
@@ -558,7 +556,7 @@ class Component extends DCLogic {
 
   _stack(id, dataObj, order, percent, extra) {
     const C = window.CALC; extra = extra || {};
-    this._mk(id, window.HYReport.stackConfig({ dataObj, order, percent, barR: this.barR, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys }, { periodos: C.periodos, unit: this.unidade === 'Unidades' ? 'Mil un' : 'R$ MM', rotulos: this.rotulos, eixoY: this.eixoY }));
+    this._mk(id, window.HYReport.stackConfig({ dataObj, order, percent, barR: this.barR, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys, ramp: extra.ramp }, { periodos: C.periodos, unit: this.unidade === 'Unidades' ? 'Mil un' : 'R$ MM', rotulos: this.rotulos, eixoY: this.eixoY }));
   }
 
   _groupLira(obj) {
@@ -597,7 +595,7 @@ class Component extends DCLogic {
     const raw = C.ordenar(C.agrupar(u, dim, filtro)), order = Object.keys(raw);
     const single = this.$('#panSingle'), dual = this.$('#panDual');
     single.style.display = 'none'; dual.style.display = 'grid';
-    const growBars = (id, fn) => { const gc = order.map(k => ({ k, v: fn(k) })).filter(o => o.v != null).sort((a, b) => b.v - a.v); this._mk(id, { type: 'bar', data: { labels: gc.map(o => o.k), datasets: [{ data: gc.map(o => o.v), backgroundColor: gc.map(o => o.v >= 0 ? '#6FA98C' : '#CB8C8C'), borderRadius: this.barR, datalabels: { display: true, anchor: 'end', align: (c) => c.dataset.data[c.dataIndex] >= 0 ? 'end' : 'start', color: '#292A2B', font: { size: 12, weight: '700' }, formatter: v => C.fmtPct(v, 0) } }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 46, left: 46 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: x => C.fmtPct(x.parsed.x) } } }, scales: { x: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 12 } } } } } }); };
+    const growBars = (id, fn) => { const gc = order.map(k => ({ k, v: fn(k) })).filter(o => o.v != null).sort((a, b) => b.v - a.v); this._mk(id, { type: 'bar', data: { labels: gc.map(o => o.k), datasets: [{ data: gc.map(o => o.v), backgroundColor: gc.map(o => o.v >= 0 ? '#6FA98C' : '#CB8C8C'), borderRadius: this.barR, datalabels: { display: true, anchor: 'end', align: (c) => c.dataset.data[c.dataIndex] >= 0 ? 'end' : 'start', color: '#292A2B', font: { size: 15, weight: '700' }, formatter: v => C.fmtPct(v, 0) } }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { right: 46, left: 46 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: x => C.fmtPct(x.parsed.x) } } }, scales: { x: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 12 } } } } } }); };
     if (this.panMetric === 'cresc') {
       this.$('#panT1').textContent = 'Crescimento vs. mês anterior (%)';
       this.$('#panT2').textContent = 'Crescimento vs. ano anterior — YoY (%)';
@@ -636,8 +634,8 @@ class Component extends DCLogic {
     const geral = this.canalView === 'geral';
     this.$('#canGeral').style.display = geral ? 'grid' : 'none';
     this.$('#canMarcaWrap').style.display = geral ? 'none' : 'block';
-    if (geral) { const raw = C.raw(u, 'canal'), order = ['Indireto', 'Direto']; this._stack('chCanAbs', raw, order, false); this._stack('chCanShr', C.share(u, 'canal'), order, true); this._cap('capCanal', raw); }
-    else { this._renderCanalMarca(); this.$('#capCanal').textContent = ''; }
+    if (geral) { const raw = C.raw(u, 'canal'), order = ['Indireto', 'Direto']; this._stack('chCanAbs', raw, order, false); this._stack('chCanShr', C.share(u, 'canal'), order, true); }
+    else { this._renderCanalMarca(); }
   }
 
   _absFromRep(rep, total) {
@@ -655,10 +653,9 @@ class Component extends DCLogic {
     let obj;
     if (V[this.concMol]) obj = V[this.concMol];
     else { const total = C.raw(u, 'marca')[this.concMol] || C.periodos.map(() => 0); obj = this._absFromRep(CP[this.concMol], total); }
-    const order = Object.keys(obj);
-    this._stack('chAbsConc', obj, order, false);
-    this._stack('chShrConc', this._subShare(obj), order, true);
-    this._cap('capConc', obj);
+    const order = Object.keys(obj).sort((a, b) => (parseFloat(String(a).replace(',', '.')) || 0) - (parseFloat(String(b).replace(',', '.')) || 0));
+    this._stack('chAbsConc', obj, order, false, { ramp: true });
+    this._stack('chShrConc', this._subShare(obj), order, true, { ramp: true });
   }
 
   _renderSC() {
@@ -683,7 +680,7 @@ class Component extends DCLogic {
     if (!this.$('#chCanalMarca')) return;
     const cm = C.B.CANAL_MARCA, L = C.periodos.length - 1, brands = Object.keys(cm);
     const dir = brands.map(b => cm[b][L]), ind = dir.map(v => Math.round((100 - v) * 10) / 10);
-    const dl = (color) => this.rotulos ? { display: true, color, font: { size: 12, weight: '700' }, formatter: v => C.fmtNum(v, 0) + '%' } : { display: false };
+    const dl = (color) => this.rotulos ? { display: true, color, font: { size: 15, weight: '700' }, formatter: v => C.fmtNum(v, 0) + '%' } : { display: false };
     this._mk('chCanalMarca', {
       type: 'bar', data: { labels: brands, datasets: [
         { label: 'Direto', data: dir, backgroundColor: C.cor('Direto'), stack: 's', datalabels: dl('#fff') },
@@ -935,7 +932,7 @@ class Component extends DCLogic {
       return {
         label: k, data: shareObj[k], backgroundColor: col, stack: 's', borderWidth: 0,
         datalabels: rot
-          ? { display: (ctx) => (ctx.dataIndex === 0 || ctx.dataIndex === last) && ctx.dataset.data[ctx.dataIndex] >= 6, color: this._light(col) ? '#074878' : '#fff', font: { size: 12, weight: '700' }, formatter: (v) => C.fmtNum(v, 0) + '%' }
+          ? { display: (ctx) => window.HYReport.anchors(ctx.chart.data.labels).has(ctx.dataIndex) && ctx.dataset.data[ctx.dataIndex] >= 6, anchor: 'center', align: 'center', clamp: true, color: this._light(col) ? '#074878' : '#fff', font: { size: 15, weight: '700' }, formatter: (v) => C.fmtNum(v, 0) + '%' }
           : { display: false }
       };
     });
@@ -967,7 +964,7 @@ class Component extends DCLogic {
     this.$('#doseChips').innerHTML = doses.map(dz => { const on = dz === this.dose; return `<button class="hy-tgl dz-chip" data-d="${dz}" style="font-family:inherit;font-size:18px;font-weight:600;padding:6px 16px;border-radius:800px;cursor:pointer;border:1.5px solid var(--hy-blue);background:${on ? 'var(--hy-blue)' : '#fff'};color:${on ? '#fff' : 'var(--hy-blue)'};">${dz}</button>`; }).join('');
     this.$$('.dz-chip').forEach(b => b.addEventListener('click', () => { this.dose = b.dataset.d; this._renderPreco(); }));
     const d = par.dosagens[this.dose], rot = this.rotulos;
-    const dl = (align, color) => rot ? { display: true, align, color, font: { size: 12, weight: '700' }, formatter: v => C.fmtR$(v, 0) } : { display: false };
+    const dl = (align, color) => rot ? { display: (c) => window.HYReport.anchors(c.chart.data.labels).has(c.dataIndex), align, color, font: { size: 15, weight: '700' }, formatter: v => C.fmtR$(v, 0) } : { display: false };
     this._mk('chPreco', { type: 'line', data: { labels: P.semanas, datasets: [
       { label: par.referencia + ' (ref.)', data: d.evRef, borderColor: C.cor('Preço ref.'), backgroundColor: C.cor('Preço ref.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: dl('top', '#074878') },
       { label: par.concorrente, data: d.evConc, borderColor: C.cor('Preço conc.'), backgroundColor: C.cor('Preço conc.'), borderWidth: 3, tension: .25, pointRadius: 4, datalabels: dl('bottom', '#0062AA') } ] },
