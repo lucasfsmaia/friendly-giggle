@@ -112,14 +112,72 @@ class Component extends DCLogic {
       this.cols = CANON.filter(c => at(c) != null);
       this.iPer = this.cols.indexOf('periodo'); this.iPPP = this.cols.indexOf('PPP'); this.iUn = this.cols.indexOf('unidades'); this.iCPP = this.cols.indexOf('CPP');
       const iMarcaSrc = srcIx['marca'];
-      const body = rows.slice(1).filter(r => r[iMarcaSrc] && r[iMarcaSrc].trim())
-        .map(r => this.cols.map(c => { const si = at(c); return String(si != null && r[si] != null ? r[si] : '').trim(); }));
+      const raw = rows.slice(1).filter(r => r[iMarcaSrc] && r[iMarcaSrc].trim());
+      // Detecção da "nova extração": periodo no formato aaaamm (ex.: 202510).
+      // Nesse cenário PPP/CPP vêm em R$ (não R$ MM) e unidades em absoluto (não Mil),
+      // então normalizamos escala + rótulo para o formato da base (mmm/aa, R$ MM, Mil).
+      const iPerSrc = at('periodo');
+      const isAAAAMM = v => /^\d{6}$/.test(String(v == null ? '' : v).trim());
+      const rawExtraction = raw.length > 0 && raw.filter(r => isAAAAMM(r[iPerSrc])).length > raw.length / 2;
+      const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+      // De-para de marcas: nome da extração (CAIXA ALTA + sufixo de corporação) → nome canônico do deck.
+      // Edite/estenda aqui quando surgirem novas marcas (ex.: agrupadas como "Saxenda/Victoza").
+      const MARCA_MAP = {
+        'MOUNJARO LLY': 'Mounjaro', 'WEGOVY N_N': 'Wegovy', 'OZEMPIC N_N': 'Ozempic',
+        'RYBELSUS N_N': 'Rybelsus', 'POVIZTRA EUF': 'Poviztra', 'EXTENSIOR EUF': 'Extensior'
+      };
+      const normMarca = v => {
+        const k = String(v == null ? '' : v).trim();
+        if (!k) return k;
+        if (MARCA_MAP[k.toUpperCase()]) return MARCA_MAP[k.toUpperCase()];
+        // fallback: remove sufixo de corporação (última palavra tipo LLY / N_N / EUF / CORP) e ajusta caixa
+        const core = k.replace(/\s+(LLY|N_N|NN|EUF|CORP|LTDA|SA|S\/A|ABT|BAY|MSD|NC|NOVO|LILLY|EUROFARMA)\.?$/i, '').trim() || k;
+        return core.split(/(\s+|\/)/).map(w => (/^\s+$/.test(w) || w === '/' || w.length <= 2) ? w : w[0].toUpperCase() + w.slice(1).toLowerCase()).join('');
+      };
+      const normPer = v => { const m = String(v == null ? '' : v).trim().match(/^(\d{4})(\d{2})$/); return m ? MES[+m[2] - 1] + '/' + m[1].slice(2) : String(v == null ? '' : v).trim(); };
+      // De-para de moléculas (extração em inglês/CAIXA ALTA → pt-BR do deck). Fallback: -tide→-tida + caixa.
+      const MOL_MAP = {
+        'SEMAGLUTIDE': 'Semaglutida', 'TIRZEPATIDE': 'Tirzepatida', 'LIRAGLUTIDE': 'Liraglutida',
+        'SEMAGLUTIDA': 'Semaglutida', 'TIRZEPATIDA': 'Tirzepatida', 'LIRAGLUTIDA': 'Liraglutida'
+      };
+      const normMol = v => {
+        const k = String(v == null ? '' : v).trim(); if (!k) return k;
+        if (MOL_MAP[k.toUpperCase()]) return MOL_MAP[k.toUpperCase()];
+        return (k[0].toUpperCase() + k.slice(1).toLowerCase()).replace(/tide$/i, 'tida');
+      };
+      // Dosagem: passa como está (formato com ".", corrigido na origem).
+      // Corporação: usa o mapa CORP da base (marca canônica → corporação) como fonte; fallback limpa "… CORP".
+      const CORP = this.base.CORP || {};
+      const normCorp = (v, marca) => {
+        if (CORP[marca]) return CORP[marca];
+        const k = String(v == null ? '' : v).trim(); if (!k) return k;
+        const core = k.replace(/\s+CORP\.?$/i, '').trim() || k;
+        return core.split(/(\s+|\/)/).map(w => (/^\s+$/.test(w) || w === '/' || w.length <= 2) ? w : w[0].toUpperCase() + w.slice(1).toLowerCase()).join('');
+      };
+      const scale = (v, f) => { const n = this._num(v); return n == null ? String(v == null ? '' : v).trim() : String(n / f); };
+      const iMarcaSrcCol = at('marca');
+      const body = raw.map(r => {
+        const mk = normMarca(iMarcaSrcCol != null ? r[iMarcaSrcCol] : '');
+        return this.cols.map(c => {
+          const si = at(c); const val = si != null && r[si] != null ? r[si] : '';
+          if (c === 'marca') return mk;
+          if (c === 'molecula') return normMol(val);
+          if (c === 'corporacao') return normCorp(val, mk);
+          if (c === 'periodo') return normPer(val);
+          if (rawExtraction && (c === 'PPP' || c === 'CPP')) return scale(val, 1e6);
+          if (rawExtraction && c === 'unidades') return scale(val, 1e3);
+          return String(val).trim();
+        });
+      });
       this._dados = body;
       const pers = []; body.forEach(r => { const p = (r[this.iPer] || '').trim(); if (p && !pers.includes(p)) pers.push(p); });
+      // eixo do tempo = ordem cronológica (o Excel pode vir desordenado)
+      const perKey = p => { const mi = MES.indexOf(String(p).slice(0, 3)); const y = +String(p).slice(4); return (isNaN(y) ? 0 : y) * 12 + (mi < 0 ? 0 : mi); };
+      pers.sort((a, b) => perKey(a) - perKey(b));
       if (pers.length) { this._periodos = pers; this.$('inpRef').value = pers[pers.length - 1]; }
       this._perInfo();
       info.style.color = 'var(--color-success)';
-      info.innerHTML = `✓ <b>${name}</b>: ${body.length} linhas · ${pers.length} períodos${this.iCPP >= 0 ? ' · com CPP' : ''}. Preço: ${this._pre.length} linhas. Clique em <b>Validar e gerar base</b>.`;
+      info.innerHTML = `✓ <b>${name}</b>: ${body.length} linhas · ${pers.length} períodos${this.iCPP >= 0 ? ' · com CPP' : ''}${rawExtraction ? ' · <b>extração aaaamm normalizada</b> (R$→R$ MM, un.→Mil)' : ''}. Preço: ${this._pre.length} linhas. Clique em <b>Validar e gerar base</b>.`;
     } catch (e) { info.style.color = 'var(--color-danger)'; info.textContent = 'Falha: ' + e.message; }
   }
   _fillPre(text) {
@@ -144,24 +202,24 @@ class Component extends DCLogic {
     if (per.length < 2) errs.push('Base com menos de 2 períodos — importe o Excel.');
     const NC = this.cols.length, FATOS = [];
     this._dados.forEach((r, i) => {
-      if (!r[0] || !r[0].trim()) return;
+      if (r[0] == null || !String(r[0]).trim()) return;
       if (r.length < NC) { errs.push('Dados linha ' + (i + 1) + ': menos de ' + NC + ' colunas'); return; }
       const pp = this._num(r[this.iPPP]), un = this._num(r[this.iUn]);
       if (pp === null || un === null) { errs.push('Dados linha ' + (i + 1) + ': PPP/unidades não numérico'); return; }
       let cpp = 0;
       if (this.iCPP >= 0) { cpp = this._num(r[this.iCPP]); if (cpp === null) { errs.push('Dados linha ' + (i + 1) + ': CPP não numérico'); return; } }
-      const pe = (r[this.iPer] || '').trim();
+      const pe = String(r[this.iPer] ?? '').trim();
       if (!per.includes(pe)) errs.push('Período fora da lista: "' + pe + '" (linha ' + (i + 1) + ')');
-      FATOS.push(this.cols.map((c, k) => (k === this.iPPP ? pp : k === this.iUn ? un : k === this.iCPP ? cpp : (r[k] || '').trim())));
+      FATOS.push(this.cols.map((c, k) => (k === this.iPPP ? pp : k === this.iUn ? un : k === this.iCPP ? cpp : String(r[k] ?? '').trim())));
     });
     if (!FATOS.length) errs.push('Nenhuma linha de dados.');
     const NCP = this.colsPre.length, iVal = this.colsPre.indexOf('valor'), PF = [];
     this._pre.forEach((r, i) => {
-      if (!r[0] || !r[0].trim()) return;
+      if (r[0] == null || !String(r[0]).trim()) return;
       if (r.length < NCP) { errs.push('Preço linha ' + (i + 1) + ': menos de ' + NCP + ' colunas'); return; }
       const v = this._num(r[iVal]);
       if (v === null) { errs.push('Preço linha ' + (i + 1) + ': valor não numérico'); return; }
-      PF.push(this.colsPre.map((c, k) => k === iVal ? v : (r[k] || '').trim()));
+      PF.push(this.colsPre.map((c, k) => k === iVal ? v : String(r[k] ?? '').trim()));
     });
     if (!PF.length) errs.push('Nenhuma linha de preço.');
 
