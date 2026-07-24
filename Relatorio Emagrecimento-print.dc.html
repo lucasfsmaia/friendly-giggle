@@ -28,14 +28,15 @@
     <div style="position:relative; height:100%; box-sizing:border-box; padding:110px 120px; display:flex; flex-direction:column; justify-content:space-between; color:#fff;">
       
       <div>
-        <div style="display:inline-block; font-size:22px; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; font-weight:600; margin-bottom:26px;">Inteligência de Mercado · Farma · Versão completa (impressão)</div>
+        <div style="display:inline-block; font-size:22px; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; font-weight:600; margin-bottom:26px;">Inteligência de Mercado</div>
         <h1 style="font-size:88px; line-height:1.04; font-weight:700; margin:0; max-width:1250px;">Mercado de Emagrecimento<br>GLP-1</h1>
         <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:38px 0 30px;"></div>
-        <p id="pcapaSub" style="font-size:34px; font-weight:500; margin:0; color:#EDF6FC;">Todas as visões · PPP (R$) e Unidades · FMB IQVIA (30 dias)</p>
+        <p id="pcapaSub" style="font-size:34px; font-weight:500; margin:0; color:#EDF6FC;">Acompanhamento semanal</p>
       </div>
-      <div style="display:flex; align-items:center; gap:14px;">
-        <span id="pcapaRef" style="font-size:26px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 24px; border-radius:800px;">Referência: jun/26 · parcial</span>
-        <span id="pcapaAt" style="font-size:22px; color:#A9D0EE;">Atualizado em 14/jul/26</span>
+      <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+        <div style="display:flex; gap:14px; align-items:center;">
+          <span id="pcapaRef" style="font-size:24px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 26px; border-radius:800px; display:inline-flex; align-items:baseline; gap:8px;">FMB IQVIA&nbsp;·&nbsp;jun/26<span style="font-size:19px; font-weight:500; opacity:.66;">atualizado 14/jul/26</span></span>
+        </div>
       </div>
     </div>
   </section>
@@ -85,7 +86,7 @@ class Component extends DCLogic {
 
     const stack = (el, dataObj, order, percent, extra) => {
       extra = extra || {};
-      new Chart(el.getContext('2d'), window.HYReport.stackConfig({ dataObj, order, percent, barR: 0, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys, ramp: extra.ramp }, { periodos: C.periodos, unit: 'R$ MM', rotulos: true, eixoY: false, animation: false, tooltip: false, maxTicks: 13 }));
+      new Chart(el.getContext('2d'), window.HYReport.stackConfig({ dataObj, order, percent, barR: 0, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys, ramp: extra.ramp, shareParen: extra.shareParen }, { periodos: C.periodos, unit: 'R$ MM', rotulos: true, eixoY: false, animation: false, tooltip: false, maxTicks: 13 }));
     };
     const groupLira = (obj) => {
       const lira = C.periodos.map(() => 0); let has = false; const out = {};
@@ -106,13 +107,14 @@ class Component extends DCLogic {
     const perTxt = (_M.referencia || '') + (_M.parcial ? ' · parcial' : '');
     const selo = (u) => (u ? uLbl(u) + ' · ' : '') + perTxt;
     const seloHtml = (u) => { const pill = (t) => `<span style="flex:none;font-size:22px;font-weight:600;color:#0062AA;background:#EDF6FC;border:1px solid #A9D0EE;padding:8px 20px;border-radius:800px;white-space:nowrap;">${t}</span>`; return `<span style="display:flex;align-items:center;gap:10px;flex:none;">${u ? pill(uLbl(u)) : ''}${pill(perTxt)}</span>`; };
-    const hdr = (title, mb = 20, u = null) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 ${mb}px;"><div style="display:flex;align-items:center;gap:18px;min-width:0;"><div style="width:6px;height:42px;background:#00BFDF;border-radius:800px;flex:none;"></div><h2 style="font-size:44px;font-weight:700;color:#292A2B;margin:0;">${title}</h2></div>${seloHtml(u)}</div>`;
-    { const _cr = document.getElementById('pcapaRef'); if (_cr) _cr.textContent = 'Referência: ' + perTxt; const _ca = document.getElementById('pcapaAt'); if (_ca && _M.atualizadoEm) _ca.textContent = 'Atualizado em ' + _M.atualizadoEm; const _ps = document.getElementById('pcapaSub'); if (_ps) _ps.textContent = 'Todas as visões · ' + (C.hasCPP ? 'PPP (R$), CPP (R$) e Unidades' : 'PPP (R$) e Unidades') + ' · FMB IQVIA (30 dias)'; }
-    const twoPanel = (label, title, lt, lf, rt, rf, cap, u) => {
+    const kindPill = (t) => `<span style="flex:none;font-size:22px;font-weight:600;color:#fff;background:#0062AA;border:1px solid #0062AA;padding:8px 20px;border-radius:800px;white-space:nowrap;">${t}</span>`;
+    const hdr = (title, mb = 20, u = null, extra = '') => `<div style="display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 ${mb}px;"><div style="display:flex;align-items:center;gap:18px;min-width:0;"><div style="width:6px;height:42px;background:#00BFDF;border-radius:800px;flex:none;"></div><h2 style="font-size:44px;font-weight:700;color:#292A2B;margin:0;">${title}</h2></div><div style="display:flex;align-items:center;gap:10px;flex:none;">${extra}${seloHtml(u)}</div></div>`;
+    { const _cr = document.getElementById('pcapaRef'); if (_cr) _cr.innerHTML = 'FMB IQVIA&nbsp;·&nbsp;' + perTxt + (_M.atualizadoEm ? '<span style="font-size:19px; font-weight:500; opacity:.66; margin-left:2px;">atualizado ' + _M.atualizadoEm + '</span>' : ''); }
+    const twoPanel = (label, title, lt, lf, rt, rf, cap, u, pill) => {
       const s = document.createElement('section'); s.setAttribute('data-label', label); s.style.cssText = 'background:#fff;';
       const l = 'c' + (uid++), r = 'c' + (uid++);
       s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">
-        ${hdr(title, 20, u)}
+        ${hdr(title, 20, u, pill || '')}
         <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:24px;min-height:0;">
           <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:24px;font-weight:700;color:#292A2B;margin-bottom:8px;">${lt}</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${l}"></canvas></div></div>
           <div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;min-height:0;"><div style="font-size:24px;font-weight:700;color:#292A2B;margin-bottom:8px;">${rt}</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${r}"></canvas></div></div>
@@ -144,6 +146,11 @@ class Component extends DCLogic {
       const order = dim === 'canal' ? ['Indireto', 'Direto'] : Object.keys(grp);
       const shareObj = dim === 'marca' ? subShare(grp) : C.share(u, dim);
       const totAbs = C.periodos.map((_, i) => order.reduce((a, k) => a + (grp[k] ? grp[k][i] : 0), 0));
+      if (dim === 'canal') {
+        const marcas = C.ordenar(C.agrupar(u, 'marca')), gm = groupLira(marcas);
+        twoPanel(name + ' · ' + u, name + ' — sell-out por canal e por marca', 'Sell-out por canal', el => stack(el, grp, order, false, { shareParen: true }), 'Sell-out por marca', el => stack(el, gm, Object.keys(gm), false), '', u);
+        return;
+      }
       twoPanel(name + ' · ' + u, name + ' — sell-out e market share', 'Sell-out', el => stack(el, grp, order, false, { totals: totAbs, totalLabel: true, noLabelKeys: ['Liraglutida'] }), 'Market share (%)', el => stack(el, shareObj, order, true, { noLabelKeys: ['Liraglutida'] }), '', u);
     };
     const subPage = (u, mol) => {
@@ -152,7 +159,7 @@ class Component extends DCLogic {
     };
     const concPage = (u, mol) => {
       const obj = C.B.VENDAS[u].concentracao[mol], order = Object.keys(obj).sort((a, b) => (parseFloat(String(a).replace(',', '.')) || 0) - (parseFloat(String(b).replace(',', '.')) || 0));
-      twoPanel('Conc ' + mol + ' · ' + u, 'Dosagem — ' + mol, 'Sell-out por dosagem', el => stack(el, obj, order, false, { ramp: true }), 'Representatividade (%)', el => stack(el, subShare(obj), order, true, { ramp: true }), '', u);
+      twoPanel('Conc ' + mol + ' · ' + u, 'Dosagem — ' + mol, 'Sell-out por dosagem', el => stack(el, obj, order, false, { ramp: true }), 'Representatividade (%)', el => stack(el, subShare(obj), order, true, { ramp: true }), '', u, kindPill('Molécula'));
     };
     const corpPage = (u, corp) => {
       const marcas = C.ordenar(marcasCorp(u, corp)), order = Object.keys(marcas);
@@ -220,10 +227,22 @@ class Component extends DCLogic {
 
     const absFromRep = (rep, total) => { const per = C.periodos, keys = Object.keys(rep), out = {}; keys.forEach(k => out[k] = []); for (let i = 0; i < per.length; i++) { const s = keys.reduce((a, k) => a + rep[k][i], 0) || 1; keys.forEach(k => out[k].push(Math.round(total[i] * rep[k][i] / s * 10) / 10)); } return out; };
     const lineGrowth = (el, raw, order) => { const gc = order.map(k => ({ k, v: C.ultimo(C.crescMAA(raw[k])) })).filter(o => o.v != null).sort((a, b) => b.v - a.v); new Chart(el.getContext('2d'), { type: 'bar', data: { labels: gc.map(o => o.k), datasets: [{ data: gc.map(o => o.v), backgroundColor: gc.map(o => o.v >= 0 ? '#6FA98C' : '#CB8C8C'), borderRadius: 4, datalabels: { display: true, anchor: 'end', align: (c) => c.dataset.data[c.dataIndex] >= 0 ? 'end' : 'start', color: '#292A2B', font: { size: 15, weight: '700' }, formatter: v => C.fmtPct(v, 0) } }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: false, layout: { padding: { right: 46, left: 46 } }, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { grid: { color: '#EFEFEF' }, ticks: { callback: v => v + '%', font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 12 } } } } } }); };
-    const scPage = (u, dim, name) => { const raw = dim === 'corporacao' ? C.raw(u, dim) : C.ordenar(C.raw(u, dim)), order = Object.keys(raw); twoPanel('Cresc ' + name + ' · ' + u, 'Sell-out e crescimento — ' + name, 'Sell-out', el => stack(el, raw, order, false), 'Crescimento vs. ano anterior (YoY)', el => lineGrowth(el, raw, order), capOf(raw), u); };
-    const concProdPage = (u, prod) => { const total = C.raw(u, 'marca')[prod] || C.periodos.map(() => 0), obj = absFromRep(C.B.CONC_PRODUTO[prod], total), order = Object.keys(obj).sort((a, b) => (parseFloat(String(a).replace(',', '.')) || 0) - (parseFloat(String(b).replace(',', '.')) || 0)); twoPanel('Conc ' + prod + ' · ' + u, 'Dosagem — ' + prod + ' (produto)', 'Sell-out por dosagem', el => stack(el, obj, order, false, { ramp: true }), 'Representatividade (%)', el => stack(el, subShare(obj), order, true, { ramp: true }), '', u); };
+    const scPage = (u, dim, name) => { const raw = dim === 'corporacao' ? C.raw(u, dim) : C.ordenar(C.raw(u, dim)), order = Object.keys(raw); twoPanel('Cresc ' + name + ' · ' + u, 'Sell-out e crescimento — ' + name, 'Sell-out', el => stack(el, raw, order, false), 'Crescimento vs. ano anterior (YoY)', el => lineGrowth(el, raw, order), '', u); };
+    const concProdPage = (u, prod) => { const total = C.raw(u, 'marca')[prod] || C.periodos.map(() => 0), obj = absFromRep(C.B.CONC_PRODUTO[prod], total), order = Object.keys(obj).sort((a, b) => (parseFloat(String(a).replace(',', '.')) || 0) - (parseFloat(String(b).replace(',', '.')) || 0)); twoPanel('Conc ' + prod + ' · ' + u, 'Dosagem — ' + prod, 'Sell-out por dosagem', el => stack(el, obj, order, false, { ramp: true }), 'Representatividade (%)', el => stack(el, subShare(obj), order, true, { ramp: true }), '', u, kindPill('Produto')); };
     const onePanel = (label, title, sub, fn, u) => { const s = document.createElement('section'); s.setAttribute('data-label', label); s.style.cssText = 'background:#fff;'; const id = 'c' + (uid++); s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">${hdr(title, 6, u)}<p style="font-size:22px;color:#5D5F61;margin:0 0 18px;">${sub}</p><div style="flex:1;border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;position:relative;min-height:0;"><canvas id="${id}"></canvas></div></div>`; push(s); jobs.push(() => fn(document.getElementById(id))); };
     const canalMarcaPage = () => { onePanel('Canal por marca', 'Representatividade de canal por marca', 'Direto (DLV+VGR) vs. Indireto (VIN+VMA+VMR)', el => { const cm = C.B.CANAL_MARCA, L = C.periodos.length - 1, brands = Object.keys(cm), dir = brands.map(b => cm[b][L]), ind = dir.map(v => Math.round((100 - v) * 10) / 10); new Chart(el.getContext('2d'), { type: 'bar', data: { labels: brands, datasets: [ { label: 'Direto', data: dir, backgroundColor: C.cor('Direto'), stack: 's', datalabels: { display: true, color: '#fff', font: { size: 15, weight: '700' }, formatter: v => C.fmtNum(v, 0) + '%' } }, { label: 'Indireto', data: ind, backgroundColor: C.cor('Indireto'), stack: 's', datalabels: { display: true, color: '#074878', font: { size: 15, weight: '700' }, formatter: v => C.fmtNum(v, 0) + '%' } } ] }, options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, padding: 16, font: { size: 13 } } }, tooltip: { enabled: false } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 13 } } }, y: { stacked: true, display: false, max: 100 } } } }); }); };
+
+    const canalCompare = (u) => {
+      const raw = C.raw(u, 'canal'), mkt = C.total(u), L = C.periodos.length - 1, pre = u === 'Unidades' ? '' : 'R$ ';
+      const idD = 'c' + (uid++), idI = 'c' + (uid++);
+      const kpi = (lbl, val) => `<div style="background:#EDF6FC;border:1px solid #EFEFEF;border-radius:12px;padding:14px 16px;"><div style="font-size:15px;color:#5D5F61;font-weight:600;">${lbl}</div><div style="font-size:30px;font-weight:700;color:#0062AA;line-height:1.1;">${val}</div></div>`;
+      const col = (canal, sw, cid) => { const s = raw[canal] || C.periodos.map(() => 0); return `<div style="border:1px solid #EFEFEF;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;min-height:0;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="width:14px;height:14px;border-radius:4px;background:${sw};"></span><div style="font-size:24px;font-weight:700;color:#292A2B;">${canal}</div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">${kpi('Sell-out', pre + C.fmtNum(s[L], 0))}${kpi('Share mercado', C.fmtNum(mkt[L] ? s[L] / mkt[L] * 100 : 0, 1) + '%')}${kpi('Cresc.', C.fmtPct(C.ultimo(C.cresc(s))))}</div><div style="font-size:18px;font-weight:700;color:#292A2B;margin-bottom:6px;">Mix por molécula (%)</div><div style="flex:1;position:relative;min-height:0;"><canvas id="${cid}"></canvas></div></div>`; };
+      const s = document.createElement('section'); s.setAttribute('data-label', 'Canal · Direto vs. Indireto · ' + u); s.style.cssText = 'background:#fff;';
+      s.innerHTML = `<div style="height:100%;box-sizing:border-box;padding:56px 64px 44px;display:flex;flex-direction:column;">${hdr('Canal — Direto vs. Indireto', 18, u)}<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:24px;min-height:0;">${col('Direto', '#0062AA', idD)}${col('Indireto', '#A9D0EE', idI)}</div></div>`;
+      push(s);
+      jobs.push(() => { const m = C.ordenar(C.agrupar(u, 'molecula', { canal: 'Direto' })); stack(document.getElementById(idD), subShare(m), Object.keys(m), true); });
+      jobs.push(() => { const m = C.ordenar(C.agrupar(u, 'molecula', { canal: 'Indireto' })); stack(document.getElementById(idI), subShare(m), Object.keys(m), true); });
+    };
 
     const execPage = () => {
       const u = 'PPP', L = C.periodos.length - 1, back = (a, k) => a[Math.max(0, L - k)];
@@ -332,12 +351,12 @@ class Component extends DCLogic {
 
     // ---- Montagem: fluxo igual ao HTML (One Page → Demanda → Preço) ----
     let n = 1;
-    const UNITS = C.hasCPP ? ['PPP', 'Unidades', 'CPP'] : ['PPP', 'Unidades'];
+    const UNITS = C.hasCPP ? ['PPP', 'CPP', 'Unidades'] : ['PPP', 'Unidades'];
     const _uDesc = C.hasCPP ? 'em PPP (R$), CPP (R$) e Unidades.' : 'em PPP (R$) e Unidades.';
     divider(String(n++).padStart(2, '0'), 'One Page — Visão de Mercado', 'Mercado total e mergulhos por corporação e por canal, ' + _uDesc);
     UNITS.forEach(u => onePageComposite(u));
-    UNITS.forEach(u => Object.keys(C.raw(u, 'corporacao')).forEach(corp => corpComposite(u, corp)));
-    UNITS.forEach(u => Object.keys(C.raw(u, 'canal')).forEach(canal => canalComposite(u, canal)));
+    Object.keys(C.raw('PPP', 'corporacao')).forEach(corp => UNITS.forEach(u => corpComposite(u, corp)));
+    Object.keys(C.raw('PPP', 'canal')).forEach(canal => UNITS.forEach(u => canalComposite(u, canal)));
 
     divider(String(n++).padStart(2, '0'), 'Demanda — Análise por Dimensão', 'Molécula, corporação, marca, crescimento, dinâmica por molécula, dosagem e canal.');
     UNITS.forEach(u => {
@@ -353,6 +372,7 @@ class Component extends DCLogic {
       concPage(u, 'Tirzepatida');
       ['Wegovy', 'Ozempic', 'Poviztra', 'Rybelsus'].forEach(p => concProdPage(u, p));
       dimPage(u, 'canal', 'Canal');
+      canalCompare(u);
     });
     canalMarcaPage();
 

@@ -20,8 +20,8 @@
     const tx = x => ('0' + Math.round(x * 255).toString(16)).slice(-2);
     return '#' + tx(R) + tx(G) + tx(B);
   }
-  const LE1 = new Set(['0,25mg', '0,5mg', '1mg']); // Semaglutida até 1mg (injetável)
-  const molOrder = ['Tirzepatida', 'Semaglutida (até 1mg)', 'Semaglutida (>1mg)', 'Liraglutida'];
+  const LE1 = new Set(['0,25mg', '0,5mg', '1mg']); // Semaglutida até 1mg — usado só no segmento target
+  const molOrder = ['Tirzepatida', 'Semaglutida', 'Liraglutida'];
 
   // --- ingestão: monta as estruturas a partir de RAW.FATOS (uma única vez) ---
   function build(RAW) {
@@ -32,7 +32,8 @@
     const C = { marca: ix.marca ?? 0, molecula: ix.molecula ?? 1, corp: ix.corporacao, periodo: ix.periodo, canal: ix.canal, conc: ix.dosagem ?? ix.concentracao, target: ix.target, ppp: ix.ppp ?? CO.length - 2, un: ix.unidades ?? CO.length - 1, cpp: ix.cpp };
     const CORP = RAW.CORP || {};
     const corpOf = r => (C.corp != null ? r[C.corp] : null) || CORP[r[C.marca]] || '—';
-    const molLabel = r => r[C.molecula] === 'Semaglutida' ? 'Semaglutida (' + (LE1.has(r[C.conc]) ? 'até 1mg' : '>1mg') + ')' : r[C.molecula];
+    // Molécula sem qualificação de dose — a quebra ≤1mg vale só para o segmento target (SEG, via LE1/coluna target).
+    const molLabel = r => r[C.molecula];
     const add = (o, k, i, v) => { (o[k] = o[k] || blank())[i] += v; };
 
     const HASCPP = C.cpp != null;
@@ -199,10 +200,10 @@
 
     cor(nome) {
       const map = {
-        'Tirzepatida': '#074878', 'Semaglutida (até 1mg)': '#0062AA', 'Semaglutida (>1mg)': '#3E9BD6', 'Liraglutida': '#A9D0EE',
+        'Tirzepatida': '#074878', 'Semaglutida': '#0062AA', 'Semaglutida (até 1mg)': '#0062AA', 'Semaglutida (>1mg)': '#3E9BD6', 'Liraglutida': '#A9D0EE',
         'Mounjaro': '#074878', 'Wegovy': '#0062AA', 'Poviztra': '#00BFDF', 'Ozempic': '#3E9BD6', 'Outros': '#C6D9E6',
         'Novo Nordisk': '#0062AA', 'Lilly': '#074878', 'Eurofarma': '#00BFDF', 'NC Farma': '#A9D0EE',
-        'Rybelsus': '#7FB2D9', 'Extensior': '#5AA0CF', 'Saxenda/Victoza': '#0062AA', 'Olire/Lirux': '#00BFDF',
+        'Rybelsus': '#7FB2D9', 'Extensior': '#5AA0CF', 'Saxenda/Victoza': '#0062AA', 'Olire': '#00BFDF', 'Lirux': '#7FB2D9', 'Olire/Lirux': '#00BFDF', 'EMS': '#00BFDF',
         'Segmento target': '#0062AA', 'Wegovy_ref': '#074878', 'Ozempic_ref': '#074878',
         'Share no mercado (%)': '#00BFDF', 'Cresc. mercado (%)': '#00BFDF', 'Preço ref.': '#074878', 'Preço conc.': '#0062AA',
         'Direto': '#0062AA', 'Indireto': '#A9D0EE',

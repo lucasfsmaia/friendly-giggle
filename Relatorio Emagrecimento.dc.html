@@ -42,12 +42,12 @@
   </style>
 </helmet>
 <div style="font-family: 'Asap', sans-serif;">
-<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#074878"/><g transform="translate(30,32)"><rect x="0" y="20" width="8" height="16" rx="1.5" fill="#00BFDF"/><rect x="12" y="10" width="8" height="26" rx="1.5" fill="#A9D0EE"/><rect x="24" y="2" width="8" height="34" rx="1.5" fill="#fff"/></g></svg></template>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#074878"></rect><g transform="translate(30,32)"><rect x="0" y="20" width="8" height="16" rx="1.5" fill="#00BFDF"></rect><rect x="12" y="10" width="8" height="26" rx="1.5" fill="#A9D0EE"></rect><rect x="24" y="2" width="8" height="34" rx="1.5" fill="#fff"></rect></g></svg></template>
 <button class="hy-pdf-btn" onClick="{{ baixarPdf }}" data-uneditable="" style="position:fixed; top:18px; right:18px; z-index:2147483647; display:inline-flex; align-items:center; gap:8px; background:#0062AA; color:#fff; border:none; border-radius:8px; padding:10px 18px; font-family:'Asap',sans-serif; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(7,72,120,.20);">
   <span class="material-symbols-outlined" style="font-size:20px;">picture_as_pdf</span>
   Baixar PDF
 </button>
-<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" no-rail="" hint-size="100%,100%" data-uneditable="">
 
   <!-- 1 · CAPA -->
   <section data-label="Capa" data-speaker-notes="Relatório mensal do mercado de emagrecimento GLP-1. Toda a apresentação é gerada a partir de uma base de dados única e atualizável." style="position:relative; overflow:hidden; background:#074878;">
@@ -57,15 +57,14 @@
   <div style="position:relative; height:100%; box-sizing:border-box; padding:110px 120px; display:flex; flex-direction:column; justify-content:space-between; color:#fff;">
       
       <div>
-        <div style="display:inline-block; font-size:22px; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; font-weight:600; margin-bottom:26px;">Inteligência de Mercado · Farma</div>
+        <div style="display:inline-block; font-size:22px; letter-spacing:.14em; text-transform:uppercase; color:#A9D0EE; font-weight:600; margin-bottom:26px;">INTELIGÊNCIA DE MERCADO</div>
         <h1 style="font-size:88px; line-height:1.04; font-weight:700; margin:0; max-width:1250px;">Mercado de Emagrecimento<br>GLP-1</h1>
         <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:38px 0 30px;"></div>
-        <p style="font-size:34px; font-weight:500; margin:0; color:#EDF6FC;">Acompanhamento mensal · FMB IQVIA (30 dias)</p>
+        <p style="font-size:34px; font-weight:500; margin:0; color:#EDF6FC;">Acompanhamento semanal</p>
       </div>
       <div style="display:flex; align-items:flex-end; justify-content:space-between;">
         <div style="display:flex; gap:14px; align-items:center;">
-          <span id="capaRef" style="font-size:26px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 24px; border-radius:800px;">Referência: jun/26 · parcial</span>
-          <span id="capaAt" style="font-size:22px; color:#A9D0EE;">Atualizado em 14/jul/26</span>
+          <span id="capaRef" style="font-size:24px; font-weight:700; background:#00BFDF; color:#074878; padding:10px 26px; border-radius:800px; display:inline-flex; align-items:baseline; gap:8px;">FMB IQVIA&nbsp;·&nbsp;jun/26<span style="font-size:19px; font-weight:500; opacity:.66;">atualizado 14/jul/26</span></span>
         </div>
         
       </div>
@@ -84,7 +83,8 @@
 
   <!-- 3 · ONE PAGE DASHBOARD -->
   <section data-label="One Page" data-speaker-notes="Painel principal. KPIs no topo; gráfico grande = mercado total vs segmento target + crescimento; à direita, market share por marca, molécula e corporação. Botões PPP/Unidades trocam a visão instantaneamente." style="background:#fff;">
-    <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
+    
+  <div style="height:100%; box-sizing:border-box; padding:56px 64px 44px; display:flex; flex-direction:column;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:18px;">
           <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
@@ -144,9 +144,8 @@
           </div>
         </div>
       </div>
-      <div style="font-size:16px; color:var(--hy-muted); margin-top:14px;">Nota: Mercado total (considera patentes) · Fonte: FMB IQVIA Jun/26 (30 dias) · Driver PP · Corporação e segmento derivados automaticamente da base.</div>
-    </div>
-  </section>
+      
+    </div></section>
 
   <!-- ONE PAGE · CORPORAÇÃO -->
   <section data-label="One Page · Corporação" data-speaker-notes="Visão consolidada de uma corporação: sell-out, share no mercado, marca líder e mix de marca e molécula. Selecione a corporação no topo." style="background:#fff;">
@@ -212,10 +211,11 @@
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <div style="display:flex; gap:10px; align-items:center;" id="canChips"></div>
-          <button class="hy-tgl cmol-tgl" data-mo="Total" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Total</button>
+          <span style="font-size:17px; color:var(--hy-muted); font-weight:600; margin:0 2px 0 8px;">Molécula:</span>
           <button class="hy-tgl cmol-tgl" data-mo="Semaglutida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Semaglutida</button>
           <button class="hy-tgl cmol-tgl" data-mo="Tirzepatida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Tirzepatida</button>
           <button class="hy-tgl cmol-tgl" data-mo="Liraglutida" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Liraglutida</button>
+          <button class="hy-tgl cmol-tgl" data-mo="Todas" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Todas</button>
           <button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button>
           <button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button>
         </div>
@@ -326,14 +326,50 @@
           <div style="width:6px; height:42px; background:var(--hy-cyan); border-radius:800px; flex:none;"></div>
           <h2 style="font-size:44px; font-weight:700; color:var(--hy-ink); margin:0;">Canal</h2>
         </div>
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;"><button class="hy-tgl cv-tgl" data-v="geral" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Visão geral</button><button class="hy-tgl cv-tgl" data-v="marca" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Por marca</button><span style="display:flex; gap:10px; align-items:center;"><button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button><button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button></span></div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;"><button class="hy-tgl cv-tgl" data-v="geral" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Visão geral</button><button class="hy-tgl cv-tgl" data-v="compare" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Direto vs. Indireto</button><button class="hy-tgl cv-tgl" data-v="dep" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Dependência por marca</button><span style="display:flex; gap:10px; align-items:center;"><button class="hy-tgl u-tgl" data-u="PPP" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">PPP (R$ MM)</button><button class="hy-tgl u-tgl" data-u="Unidades" style="font-family:inherit; font-size:20px; font-weight:600; padding:8px 24px; border-radius:800px; border:1.5px solid var(--hy-blue); cursor:pointer;">Unidades (Mil)</button></span></div>
       </div>
-      <div id="canGeral"
       <div id="canGeral" style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:24px; min-height:0;">
         <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Sell-out por canal</div><div style="flex:1; position:relative; min-height:0;"><canvas id="chCanAbs"></canvas></div></div>
-        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Representatividade (%)</div><div style="flex:1; position:relative; min-height:0;"><canvas id="chCanShr"></canvas></div></div>
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;"><div style="font-size:20px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Sell-out por marca</div><div style="flex:1; position:relative; min-height:0;"><canvas id="chCanMarcaGeral"></canvas></div></div>
       </div>
-      <div id="canMarcaWrap" style="flex:1; border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; position:relative; min-height:0; display:none;"><canvas id="chCanalMarca"></canvas></div>
+      <div id="canCompare" style="flex:1; display:none; grid-template-columns:1fr 1fr; gap:24px; min-height:0;">
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;"><span style="width:14px; height:14px; border-radius:4px; background:var(--hy-blue);"></span><div style="font-size:24px; font-weight:700; color:var(--hy-ink);">Direto</div></div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">
+            <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:14px 16px;"><div style="font-size:15px; color:var(--hy-muted); font-weight:600;">Sell-out</div><div id="cmpSellD" style="font-size:30px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div></div>
+            <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:14px 16px;"><div style="font-size:15px; color:var(--hy-muted); font-weight:600;">Share mercado</div><div id="cmpShrD" style="font-size:30px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div></div>
+            <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:14px 16px;"><div style="font-size:15px; color:var(--hy-muted); font-weight:600;">Cresc.</div><div id="cmpCrsD" style="font-size:30px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div></div>
+          </div>
+          <div style="font-size:18px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Mix por molécula (%)</div>
+          <div style="flex:1; position:relative; min-height:0;"><canvas id="chCmpMolD"></canvas></div>
+        </div>
+        <div style="border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; display:flex; flex-direction:column; min-height:0;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;"><span style="width:14px; height:14px; border-radius:4px; background:#A9D0EE;"></span><div style="font-size:24px; font-weight:700; color:var(--hy-ink);">Indireto</div></div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">
+            <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:14px 16px;"><div style="font-size:15px; color:var(--hy-muted); font-weight:600;">Sell-out</div><div id="cmpSellI" style="font-size:30px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div></div>
+            <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:14px 16px;"><div style="font-size:15px; color:var(--hy-muted); font-weight:600;">Share mercado</div><div id="cmpShrI" style="font-size:30px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div></div>
+            <div style="background:var(--hy-blue-bg); border:1px solid var(--hy-border); border-radius:12px; padding:14px 16px;"><div style="font-size:15px; color:var(--hy-muted); font-weight:600;">Cresc.</div><div id="cmpCrsI" style="font-size:30px; font-weight:700; color:var(--hy-blue); line-height:1.1;">—</div></div>
+          </div>
+          <div style="font-size:18px; font-weight:700; color:var(--hy-ink); margin-bottom:6px;">Mix por molécula (%)</div>
+          <div style="flex:1; position:relative; min-height:0;"><canvas id="chCmpMolI"></canvas></div>
+        </div>
+      </div>
+      <div id="canDep" style="flex:1; display:none; flex-direction:column; border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; min-height:0;">
+        <div style="font-size:24px; font-weight:700; color:var(--hy-ink); margin-bottom:2px;">Dependência de canal por marca</div>
+        <div style="font-size:17px; color:var(--hy-muted); margin-bottom:14px;">Participação Direto vs. Indireto no sell-out de cada marca — leitura do último período.</div>
+        <div style="flex:1; position:relative; min-height:0;"><canvas id="chCanalMarca"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVISÓRIA PREÇO -->
+  <section data-label="Seção · Preço" data-speaker-notes="Acompanhamento de preço: desconto por dosagem e evolução semanal vs. referência." style="position:relative; background:linear-gradient(120deg,#074878 0%,#0062AA 100%); overflow:hidden;">
+    <div style="position:absolute; right:-160px; bottom:-160px; width:640px; height:640px; border-radius:50%; background:rgba(0,191,223,.16);"></div>
+    <div style="position:relative; height:100%; box-sizing:border-box; padding:120px; display:flex; flex-direction:column; justify-content:center; color:#fff;">
+      <div style="font-size:200px; font-weight:700; color:rgba(255,255,255,.14); line-height:1;">03</div>
+      <div style="width:96px; height:6px; background:#00BFDF; border-radius:800px; margin:8px 0 34px;"></div>
+      <h2 style="font-size:76px; font-weight:700; margin:0;">Preço</h2>
+      <p style="font-size:32px; color:#A9D0EE; margin:24px 0 0; max-width:1100px;">Acompanhamento por dosagem e evolução semanal, com desconto vs. referência.</p>
     </div>
   </section>
 
@@ -363,7 +399,7 @@
           <div style="flex:1; border:1px solid var(--hy-border); border-radius:14px; padding:18px 22px; position:relative; min-height:0;"><canvas id="chPreco"></canvas></div>
         </div>
       </div>
-      <div style="font-size:16px; color:var(--hy-muted); margin-top:14px;">Nota: média entre PDVs · desconto = preço médio do concorrente ÷ referência − 1.</div>
+      
     </div>
   </section>
 
@@ -429,21 +465,21 @@ class Component extends DCLogic {
     this.$('#caKpiCrescLbl').textContent = C.periodos.length > 12 ? 'vs. ano ant. (MAA)' : 'vs. mês ant. (MA)';
     let lead = null; for (const [k, s] of Object.entries(marcas)) if (!lead || s[L] > lead.v) lead = { k, v: s[L] };
     this.$('#caKpiLider').textContent = lead ? lead.k : '—';
-    const molSel = this.canalMol || 'Total';
+    const molSel = this.canalMol || 'Todas';
     this._setActive('.cmol-tgl', b => b.dataset.mo === molSel);
     let heroMarcas = marcas, heroOrder = order, heroTot = canTot, heroShare = shareMkt;
-    if (molSel !== 'Total') {
+    if (molSel !== 'Todas') {
       const fm = {}; Object.keys(marcas).forEach(m => { if (C.mapa[m] && C.mapa[m].molecula === molSel) fm[m] = marcas[m]; });
       heroMarcas = C.ordenar(fm); heroOrder = Object.keys(heroMarcas);
       heroTot = C.periodos.map((_, i) => Object.values(heroMarcas).reduce((a, s) => a + s[i], 0));
       heroShare = heroTot.map((v, i) => (mkt[i] ? Math.round(v / mkt[i] * 1000) / 10 : 0));
     }
-    this.$('#caHeroTitle').textContent = 'Sell-out por marca — canal ' + this.canalSel + (molSel !== 'Total' ? ' · ' + molSel : '') + ' · ' + unit;
+    this.$('#caHeroTitle').textContent = 'Sell-out por marca — canal ' + this.canalSel + (molSel !== 'Todas' ? ' · ' + molSel : '') + ' · ' + unit;
 
     const gCanM = this._groupLira(heroMarcas), gCanO = Object.keys(gCanM);
     this._mk('chCanHero', window.HYReport.comboConfig({ barsObj: gCanM, order: gCanO, totals: heroTot, lineLabel: 'Share no mercado (%)', lineData: heroShare, unit, barR: this.barR, alwaysTotal: true }, { periodos: C.periodos, rotulos: this.rotulos, eixoY: this.eixoY }));
 
-    { const t = this.$('#tCanMarca'); if (t) t.textContent = 'Mix por marca (%)' + (molSel !== 'Total' ? ' · ' + molSel : ''); }
+    { const t = this.$('#tCanMarca'); if (t) t.textContent = 'Mix por marca (%)' + (molSel !== 'Todas' ? ' · ' + molSel : ''); }
     this._stack('chCanMarca', this._subShare(heroMarcas), heroOrder, true);
     const mol = C.ordenar(C.agrupar(u, 'molecula', { canal: this.canalSel }));
     this._stack('chCanMol', this._subShare(mol), Object.keys(mol), true);
@@ -556,7 +592,7 @@ class Component extends DCLogic {
 
   _stack(id, dataObj, order, percent, extra) {
     const C = window.CALC; extra = extra || {};
-    this._mk(id, window.HYReport.stackConfig({ dataObj, order, percent, barR: this.barR, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys, ramp: extra.ramp }, { periodos: C.periodos, unit: this.unidade === 'Unidades' ? 'Mil un' : 'R$ MM', rotulos: this.rotulos, eixoY: this.eixoY }));
+    this._mk(id, window.HYReport.stackConfig({ dataObj, order, percent, barR: this.barR, totals: extra.totals, totalLabel: extra.totalLabel, noLabelKeys: extra.noLabelKeys, ramp: extra.ramp, shareParen: extra.shareParen }, { periodos: C.periodos, unit: this.unidade === 'Unidades' ? 'Mil un' : 'R$ MM', rotulos: this.rotulos, eixoY: this.eixoY }));
   }
 
   _groupLira(obj) {
@@ -628,14 +664,37 @@ class Component extends DCLogic {
   _renderCanalSec() {
     const C = window.CALC, u = this.unidade; if (!this.$('#canGeral')) return;
     this.canalView = this.canalView || 'geral';
+    if (!['geral', 'compare', 'dep'].includes(this.canalView)) this.canalView = 'geral';
     this._setActive('.u-tgl', b => b.dataset.u === u);
     this._setActive('.cv-tgl', b => b.dataset.v === this.canalView);
     this.$$('.cv-tgl').forEach(b => b.onclick = () => { this.canalView = b.dataset.v; this._renderCanalSec(); });
-    const geral = this.canalView === 'geral';
-    this.$('#canGeral').style.display = geral ? 'grid' : 'none';
-    this.$('#canMarcaWrap').style.display = geral ? 'none' : 'block';
-    if (geral) { const raw = C.raw(u, 'canal'), order = ['Indireto', 'Direto']; this._stack('chCanAbs', raw, order, false); this._stack('chCanShr', C.share(u, 'canal'), order, true); }
+    const v = this.canalView;
+    this.$('#canGeral').style.display = v === 'geral' ? 'grid' : 'none';
+    this.$('#canCompare').style.display = v === 'compare' ? 'grid' : 'none';
+    this.$('#canDep').style.display = v === 'dep' ? 'flex' : 'none';
+    if (v === 'geral') {
+      const raw = C.raw(u, 'canal'), order = ['Indireto', 'Direto'];
+      const canTotals = C.periodos.map((_, i) => order.reduce((a, k) => a + ((raw[k] && raw[k][i]) || 0), 0));
+      this._stack('chCanAbs', raw, order, false, { shareParen: true, totals: canTotals, totalLabel: true });
+      const marcas = C.ordenar(C.agrupar(u, 'marca')), gm = this._groupLira(marcas);
+      this._stack('chCanMarcaGeral', gm, Object.keys(gm), false);
+    } else if (v === 'compare') { this._renderCanalCompare(u); }
     else { this._renderCanalMarca(); }
+  }
+
+  _renderCanalCompare(u) {
+    const C = window.CALC; if (!this.$('#chCmpMolD')) return;
+    const raw = C.raw(u, 'canal'), mkt = C.total(u), L = C.periodos.length - 1;
+    const pre = (u === 'Unidades' ? '' : 'R$ ');
+    const fill = (canal, sfx) => {
+      const s = raw[canal] || C.periodos.map(() => 0);
+      this.$('#cmpSell' + sfx).textContent = pre + C.fmtNum(s[L], 0);
+      this.$('#cmpShr' + sfx).textContent = C.fmtNum(mkt[L] ? s[L] / mkt[L] * 100 : 0, 1) + '%';
+      this.$('#cmpCrs' + sfx).textContent = C.fmtPct(C.ultimo(C.cresc(s)));
+      const mol = C.ordenar(C.agrupar(u, 'molecula', { canal }));
+      this._stack('chCmpMol' + sfx, this._subShare(mol), Object.keys(mol), true);
+    };
+    fill('Direto', 'D'); fill('Indireto', 'I');
   }
 
   _absFromRep(rep, total) {
@@ -783,15 +842,14 @@ class Component extends DCLogic {
     this.$$('.u-tgl').forEach(b => b.addEventListener('click', () => _applyUnit(b.dataset.u)));
     // Selo de período padronizado + 3ª métrica CPP (surge só quando a base tem a coluna)
     { const _M = window.BASE_EMAGRECIMENTO.META || {}; const _per = (_M.referencia || '') + (_M.parcial ? ' · parcial' : '');
-      const _cr = document.getElementById('capaRef'); if (_cr) _cr.textContent = 'Referência: ' + _per;
-      const _ca = document.getElementById('capaAt'); if (_ca && _M.atualizadoEm) _ca.textContent = 'Atualizado em ' + _M.atualizadoEm;
+      const _cr = document.getElementById('capaRef'); if (_cr) _cr.innerHTML = 'FMB IQVIA&nbsp;·&nbsp;' + _per + (_M.atualizadoEm ? '<span style="font-size:19px; font-weight:500; opacity:.66; margin-left:2px;">atualizado ' + _M.atualizadoEm + '</span>' : '');
       const _hasCPP = window.CALC.hasCPP; const _seen = new Set();
       this.$$('.u-tgl,.p-tgl').forEach(b => { const g = b.parentNode; if (_seen.has(g)) return; _seen.add(g);
         const s = document.createElement('span'); s.style.cssText = 'align-self:center;font-size:20px;font-weight:600;color:var(--hy-blue);background:var(--hy-blue-bg);border:1px solid #A9D0EE;padding:7px 18px;border-radius:800px;margin-right:4px;white-space:nowrap;'; s.textContent = _per; b.before(s);
-        if (_hasCPP && b.classList.contains('u-tgl')) { const ub = g.querySelector('.u-tgl[data-u="Unidades"]'); const cpp = document.createElement('button'); cpp.className = 'hy-tgl u-tgl'; cpp.dataset.u = 'CPP'; if (ub) cpp.setAttribute('style', ub.getAttribute('style')); cpp.textContent = 'CPP (R$ MM)'; cpp.addEventListener('click', () => _applyUnit('CPP')); g.appendChild(cpp); }
+        if (_hasCPP && b.classList.contains('u-tgl')) { const ub = g.querySelector('.u-tgl[data-u="Unidades"]'); const cpp = document.createElement('button'); cpp.className = 'hy-tgl u-tgl'; cpp.dataset.u = 'CPP'; if (ub) cpp.setAttribute('style', ub.getAttribute('style')); cpp.textContent = 'CPP (R$ MM)'; cpp.addEventListener('click', () => _applyUnit('CPP')); if (ub) g.insertBefore(cpp, ub); else g.appendChild(cpp); }
       }); }
     this.$$('.p-tgl').forEach(b => b.addEventListener('click', () => { this.par = +b.dataset.p; this.dose = null; this._renderPreco(); }));
-    this.canalMol = 'Total';
+    this.canalMol = 'Todas';
     this.$$('.cmol-tgl').forEach(b => b.addEventListener('click', () => { this.canalMol = b.dataset.mo; this._renderCanalOnePage(); }));
     
     this.concMol = 'Semaglutida';

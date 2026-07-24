@@ -27,6 +27,7 @@
     const C = window.CALC;
     const { stacked, dualAxis, percent, compact, unit, barMax, shareMin, shareMax } = o;
     const rot = !!ctx.rotulos, eixoY = !!ctx.eixoY;
+    const per = ctx.periodos || [];
     const opt = {
       responsive: true, maintainAspectRatio: false,
       animation: ctx.animation === undefined ? true : ctx.animation,
@@ -45,7 +46,10 @@
         }
       },
       scales: {
-        x: { stacked: !!stacked, grid: { display: false }, ticks: { font: { size: compact ? 11 : 12 }, maxRotation: 0, autoSkip: true, maxTicksLimit: ctx.maxTicks || (compact ? 7 : 13) } },
+        // Eixo X padronizado em TODOS os gráficos: mostra 1º mês, último e fechamentos
+        // de trimestre (mar/jun/set/dez) — mesma lógica dos rótulos (anchors). autoSkip
+        // desligado para que os limites (7 vs 13) não escolham meses diferentes por gráfico.
+        x: { stacked: !!stacked, grid: { display: false }, ticks: { font: { size: compact ? 11 : 12 }, maxRotation: 0, autoSkip: false, callback: (val, index) => anchors(per).has(index) ? (per[index] != null ? per[index] : val) : '' } },
         y: { stacked: !!stacked, display: eixoY, grid: { display: eixoY, color: '#EFEFEF' }, ticks: { font: { size: compact ? 11 : 12 }, callback: (v) => percent ? v + '%' : C.fmtNum(v, 0) }, beginAtZero: true }
       }
     };
@@ -76,11 +80,14 @@
     // Rampa de azul (claro→escuro) para dimensões sem cor semântica fixa (ex.: dosagens).
     const RAMP = ['#C6D9E6', '#A9D0EE', '#7FB2D9', '#5AA0CF', '#3E9BD6', '#0062AA', '#074878'];
     const rampCol = (i) => RAMP[keys.length <= 1 ? 0 : Math.round(i * (RAMP.length - 1) / (keys.length - 1))];
+    // shareParen: sob o rótulo de valor, mostra a representatividade (%) do segmento no total do período — ex.: "128" / "(63%)".
+    const shareParen = !!o.shareParen && !percent;
+    const idxTotals = shareParen ? (ctx.periodos || []).map((_, i) => keys.reduce((a, k) => a + ((dataObj[k] && dataObj[k][i]) || 0), 0)) : null;
     const ds = keys.map((k, idx) => {
       const col = o.ramp ? rampCol(idx) : C.cor(k);
       const minV = o.ramp ? (percent ? 0.5 : 0.01) : (percent ? 6 : 0.01);
       const seg = (rot && noLbl.indexOf(k) < 0)
-        ? { display: (c) => anchors(c.chart.data.labels).has(c.dataIndex) && c.dataset.data[c.dataIndex] >= minV, anchor: 'center', align: 'center', clamp: true, color: light(col) ? '#074878' : '#fff', font: { size: 15, weight: '700' }, formatter: (v) => percent ? C.fmtNum(v, 0) + '%' : C.fmtNum(v, 0) }
+        ? { display: (c) => anchors(c.chart.data.labels).has(c.dataIndex) && c.dataset.data[c.dataIndex] >= minV, anchor: 'center', align: 'center', clamp: true, color: light(col) ? '#074878' : '#fff', font: { size: 15, weight: '700' }, formatter: shareParen ? (v, c) => { const t = idxTotals[c.dataIndex] || 0; return [C.fmtNum(v, 0), '(' + (t ? Math.round(v / t * 100) : 0) + '%)']; } : (v) => percent ? C.fmtNum(v, 0) + '%' : C.fmtNum(v, 0) }
         : { display: false };
       let datalabels = seg;
       if (idx === lastIdx && o.totalLabel && o.totals) {

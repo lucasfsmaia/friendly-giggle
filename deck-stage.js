@@ -213,9 +213,10 @@
       align-items: center;
       gap: 4px;
       padding: 4px;
-      background: #000;
+      background: #074878;
       color: #fff;
       border-radius: 999px;
+      box-shadow: 0 6px 20px rgba(7,72,120,0.28);
       font-size: 12px;
       font-feature-settings: "tnum" 1;
       letter-spacing: 0.01em;
@@ -253,8 +254,8 @@
       transition: background 140ms ease, color 140ms ease;
       -webkit-tap-highlight-color: transparent;
     }
-    .btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .btn:active { background: rgba(255,255,255,0.18); }
+    .btn:hover { background: #00BFDF; color: #074878; }
+    .btn:active { background: #00BFDF; color: #074878; }
     .btn:focus { outline: none; }
     .btn:focus-visible { outline: none; }
     .btn::-moz-focus-inner { border: 0; }
@@ -291,8 +292,8 @@
       text-align: center;
       font-size: 12px;
     }
-    .count .sep { color: rgba(255,255,255,0.45); margin: 0 3px; font-weight: 400; }
-    .count .total { color: rgba(255,255,255,0.55); }
+    .count .sep { color: #00BFDF; margin: 0 3px; font-weight: 400; }
+    .count .total { color: rgba(255,255,255,0.6); }
 
     .divider {
       width: 1px;
